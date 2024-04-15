@@ -12,8 +12,10 @@
         <div id="landing-page">
             <h1>Welcome to Our Psychology Tests!</h1>
             <p>Select the test you would like to participate in:</p>
-            <button id="start-digit-test">Digit Entry Test</button>
-            <button id="start-cue-test">Cue-based Test</button>
+            <div class="button-container">
+                <button id="start-digit-test">Digit Entry Test</button>
+                <button id="start-cue-test">Cue-based Test</button>
+            </div>
         </div>
 
         <!-- Digit Entry Test Container -->
@@ -32,14 +34,17 @@
             </div>
         </div>
 
-
         <!-- Cue-based Test Container -->
-        <div id="cue-test-container" style="display: none;">
-            <p id="cue-prompt">Please enter the word that associates with these cues:</p>
-            <p id="cues">word1 / word2 / word3</p>
-            <input type="text" id="cue-input">
-            <button id="submit-cue">Submit</button>
-        </div>
+        <form id="cue-form" style="display: none;">
+            <div id="cue-test-container">
+                <p id="cue-prompt">Please enter the word that associates with these cues:</p>
+                <p id="cues">word1 / word2 / word3</p>
+                <input type="text" id="cue-input">
+                <div class="button-container">
+                    <button type="submit" id="submit-cue">Submit</button>
+                </div>
+            </div>
+        </form>
 
     </div>
     <script src="script.js"></script>

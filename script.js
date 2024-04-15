@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressBar = document.getElementById('progress');
     const roundProgress = document.getElementById('round-progress');
     const cueTestContainer = document.getElementById('cue-test-container');
+	const cueForm = document.getElementById('cue-form');
 
     const startDigitTestButton = document.getElementById('start-digit-test');
     const startCueTestButton = document.getElementById('start-cue-test');
@@ -31,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	let currentCueIndex = 0;
     const cuesDisplay = document.getElementById('cues');
     const cueInput = document.getElementById('cue-input');
-    const submitCueButton = document.getElementById('submit-cue');
+
 
     // Handle starting the digit test
     startDigitTestButton.addEventListener('click', function() {
@@ -55,17 +56,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle the cue test starting
     startCueTestButton.addEventListener('click', function() {
         landingPage.style.display = 'none';
-        cueTestContainer.style.display = 'block';
+        cueForm.style.display = 'block';
         presentCue();
     });
 
-    // Submitting responses for the cue test
-    submitCueButton.addEventListener('click', function() {
+    // Handle form submission
+    cueForm.addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent the default form submission
         const userResponse = cueInput.value;
-        cueInput.value = '';  // Clear input after submission
-        saveCueResponse(userResponse);
-        presentCue();  // Present next cue
+        console.log("Response saved:", userResponse); // Optionally send this to a server
+        cueInput.value = ''; // Clear the input field
+        presentCue(); // Present the next cue
     });
+
 
 	function presentCue() {
 		console.log("Presenting cue.");
@@ -81,6 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add logic to save response to a CSV or server
         console.log("Response saved: ", response);
     }
+
 
     // Handling digit input
     digitInput.addEventListener('input', function() {
@@ -181,5 +185,4 @@ document.addEventListener('DOMContentLoaded', function() {
         digitInput.disabled = true;
     }
 
-	presentCue();
 });

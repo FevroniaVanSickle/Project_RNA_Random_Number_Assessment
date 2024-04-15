@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Psychology Tests</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&display=swap" rel="stylesheet">
+</head>
+<body style="font-family: 'Roboto Condensed', sans-serif;">
+    <div class="container">
+        <div id="landing-page">
+            <h1>Welcome to Our Psychology Tests!</h1>
+            <p>Select the test you would like to participate in:</p>
+            <button id="start-digit-test">Digit Entry Test</button>
+            <button id="start-cue-test">Cue-based Test</button>
+        </div>
+
+        <!-- Digit Entry Test Container -->
+        <div id="digit-test-container" style="display: none;">
+            <p id="digit-test-description">This task will ask you to enter any digit 1-9 on 1-second intervals. If you take longer than a second, a small beep will play and you won't be able to type a number until the next round.</p>
+            <button id="start-button">Start Digit Test</button>
+            <div id="entry-container" style="display: none;">
+                <p id="prompt">Enter a digit:</p>
+                <input type="text" id="digit-input" maxlength="1">
+                <div id="progress-bar" style="width: 100%; background-color: #eee; height: 20px; margin-top: 20px;">
+                    <div id="progress" style="height: 100%; background-color: green; width: 0%;"></div>
+                </div>
+                <div id="round-progress-bar" style="width: 100%; background-color: #ccc; height: 10px; margin-top: 5px;">
+                    <div id="round-progress" style="height: 100%; background-color: orange; width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Cue-based Test Container -->
+        <div id="cue-test-container" style="display: none;">
+            <p id="cue-prompt">Please enter the word that associates with these cues:</p>
+            <p id="cues">word1 / word2 / word3</p>
+            <input type="text" id="cue-input">
+            <button id="submit-cue">Submit</button>
+        </div>
+
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

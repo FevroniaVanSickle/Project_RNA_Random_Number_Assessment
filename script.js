@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const landingPage = document.getElementById('landing-page');
     const digitTestContainer = document.getElementById('digit-test-container');
     const digitTestDescription = document.getElementById('digit-test-description');
+    const cueTestDescription = document.getElementById('cue-test-description');
     const entryContainer = document.getElementById('entry-container');
     const startButton = document.getElementById('start-button');
     const digitInput = document.getElementById('digit-input');

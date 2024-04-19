@@ -20,7 +20,24 @@
 
         <!-- Digit Entry Test Container -->
         <div id="digit-test-container" style="display: none;">
-            <p id="digit-test-description">This task will ask you to enter any digit 1-9 on 1-second intervals. If you take longer than a second, a small beep will play and you won't be able to type a number until the next round.</p>
+            <p id="digit-test-description">
+                For the next two minutes, you will be asked to complete a task in which you will
+                enter a random number (between 1 and 9) at every one-second interval. You should try
+                to be as random as possible. Picking random numbers can be thought of in terms of
+                picking numbers out of a hat, returning it, shaking the hat’s contents, and then
+                picking another number out of the hat. Doing this may sometimes, although not
+                typically, result in the same number occurring two or more times in a row
+                (e.g., 2, 2, 2). For this task you will be asked to enter a series of random numbers
+                from 1 to 9. Once you press START TASK, you will hear a soft beep (turn volume up)
+                and you will have a box to enter a number from 1 to 9. As soon as you enter one number,
+                another beep will sound and a new box will appear. You will keep doing this task for a
+                couple of minutes. Try and be as random as possible with your number entries.
+                You will have just one second to enter each number, so have your fingers on the number
+                keys and be ready to go before you press start! If you fail to enter a number within
+                1 second, you will receive a warning, “too slow!” If this happens, just continue to
+                do your best to enter numbers each second. The green bar at the bottom will indicate
+                how much longer you have left in the task.
+            </p>
             <button id="start-button">Start Digit Test</button>
             <div id="entry-container" style="display: none;">
                 <p id="prompt">Enter a digit:</p>
@@ -37,6 +54,14 @@
         <!-- Cue-based Test Container -->
         <form id="cue-form" style="display: none;">
             <div id="cue-test-container">
+                <p id="cue-test-description">
+                    For this next task, you will be presented with 3 “cue words.” Your task is to
+                    determine a single word that is commonly associated with all three cue words.
+                    You will have 15 seconds to solve each problem. For example, if given the cue
+                    words: carpet, alert, and ink. What would be the correct response? Red. As a second
+                    example, if given the cue words: cane, daddy, and plum. What would be the correct
+                    response? Sugar. 
+                </p>      
                 <p id="cue-prompt">Please enter the word that associates with these cues:</p>
                 <p id="cues">word1 / word2 / word3</p>
                 <input type="text" id="cue-input">

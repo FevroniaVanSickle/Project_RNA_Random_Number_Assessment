@@ -9,13 +9,13 @@
 </head>
 <body style="font-family: 'Roboto Condensed', sans-serif;">
     <div class="container">
-        <!-- Landing Page Section -->
         <div id="landing-page">
-            <h1>Welcome to the number and word task!</h1>
-            <p>You must complete both tasks in order to complete the study. Together, these tasks should take about 3-4 minutes to complete.</p>
-            <label for="prolific-id-input">Enter your Prolific ID:</label>
-            <input type="text" id="prolific-id-input">
-            <button id="confirm-id">Confirm ID</button>
+            <h1>Welcome to Our Psychology Tests!</h1>
+            <p>Select the test you would like to participate in:</p>
+            <div class="button-container">
+                <button id="start-digit-test">Digit Entry Test</button>
+                <button id="start-cue-test">Cue-based Test</button>
+            </div>
         </div>
 
         <!-- Digit Entry Test Container -->
@@ -38,14 +38,13 @@
                 do your best to enter numbers each second. The green bar at the bottom will indicate
                 how much longer you have left in the task.
             </p>
-            <button id="start-number-task">Start Number Task</button>
+            <button id="start-button">Start Digit Test</button>
             <div id="entry-container" style="display: none;">
                 <p id="prompt">Enter a digit:</p>
                 <input type="text" id="digit-input" maxlength="1">
-                <div id="progress-bar" style="position: absolute; bottom: 0; width: 100%; background-color: #eee; height: 20px;">
+                <div id="progress-bar" style="width: 100%; background-color: #eee; height: 20px; margin-top: 20px;">
                     <div id="progress" style="height: 100%; background-color: green; width: 0%;"></div>
                 </div>
-                <p style="position: absolute; bottom: 25px; color: green;">Progress</p>                
                 <div id="round-progress-bar" style="width: 100%; background-color: #ccc; height: 10px; margin-top: 5px;">
                     <div id="round-progress" style="height: 100%; background-color: orange; width: 100%;"></div>
                 </div>
@@ -62,16 +61,13 @@
                     words: carpet, alert, and ink. What would be the correct response? Red. As a second
                     example, if given the cue words: cane, daddy, and plum. What would be the correct
                     response? Sugar. 
-                </p>
-                <button id="start-word-task">Start Word Task</button>                
+                </p>      
                 <p id="cue-prompt">Please enter the word that associates with these cues:</p>
                 <p id="cues">word1 / word2 / word3</p>
-                <form id="cue-form">
-                    <input type="text" id="cue-input">
-                    <div class="button-container">
-                        <button type="submit" id="submit-cue">Submit</button>
-                    </div>
-                </form>
+                <input type="text" id="cue-input">
+                <div class="button-container">
+                    <button type="submit" id="submit-cue">Submit</button>
+                </div>
             </div>
         </form>
 

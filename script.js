@@ -1,189 +1,344 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Retrieve all necessary DOM elements
+    console.log('hello world!');
     const landingPage = document.getElementById('landing-page');
     const digitTestContainer = document.getElementById('digit-test-container');
     const digitTestDescription = document.getElementById('digit-test-description');
-    const cueTestDescription = document.getElementById('cue-test-description');
-    const entryContainer = document.getElementById('entry-container');
-    const startButton = document.getElementById('start-button');
-    const digitInput = document.getElementById('digit-input');
-    const prompt = document.getElementById('prompt');
+    const numberEntryContainer = document.getElementById('digit-entry-container');
+    const wordEntryContainer = document.getElementById('word-entry-container')
+    const startNumberTaskButton = document.getElementById('start-number-task');
+    const startWordTaskButton = document.getElementById('start-word-task');
+    const nextLandingButton = document.getElementById('next-landing');
+    const examplesButton = document.getElementById('examples-button');
+    const digitInputField = document.getElementById('digit-input');
+    const wordInputField = document.getElementById('word-input');
+    const wordForm = document.getElementById('word-form');
+    const wordTestContainer = document.getElementById('word-test-container');
+    const wordTestDescription = document.getElementById('word-test-description');
     const progressBar = document.getElementById('progress');
     const roundProgress = document.getElementById('round-progress');
-    const cueTestContainer = document.getElementById('cue-test-container');
-	const cueForm = document.getElementById('cue-form');
+    const prompt = document.getElementById('prompt');
+    const submitButton = document.getElementById('submit-word');
+    const progressLabel = document.getElementById('progress-label');
 
-    const startDigitTestButton = document.getElementById('start-digit-test');
-    const startCueTestButton = document.getElementById('start-cue-test');
-   
     let timeoutId;
+    let roundCount = 0;
     let digitSequence = [];
-    let totalDigits = 100;
-    let started = false;
+    let totalRounds = 10;
+    let taskType = 'number';
 
-	// New cue handling setup
-	const cues = [
-		"Piece / mind / dating",
-		"Hound / pressure / shot",
-		"Nuclear / feud / album",
-		"Carpet / alert / ink",
-		"Main / sweeper / light"
-	];
+    // Setup word test information
+    const words = ["Piece / mind / dating", "Hound / pressure / shot", "Nuclear / feud / album", "Carpet / alert / ink", "Main / sweeper / light"];
+    const examples = [
+        { cue: "carpet / alert / ink", answer: "red" },
+        { cue: "cane / daddy / plum", answer: "sugar" }
+      ];
+    let currentwordIndex = 0;
+    let exampleIndex = 0;
 
-	let currentCueIndex = 0;
-    const cuesDisplay = document.getElementById('cues');
-    const cueInput = document.getElementById('cue-input');
-
-
-    // Handle starting the digit test
-    startDigitTestButton.addEventListener('click', function() {
+    // Newly added 'Start Word Task' button event listener
+    startWordTaskButton.addEventListener('click', function() {
+        console.log('starting word task');
+        this.style.display = 'none';
+        wordTestDescription.style.display = 'none';
+        wordForm.style.display = 'block';
+        wordTestContainer.style.display = 'block';
+        wordInputField.style.display = 'block';
+        submitButton.style.display = 'block';
+        prompt.textContent = words[currentwordIndex];
+        prompt.style.display = 'block';
+    });
+    
+    nextLandingButton.addEventListener('click', function() {
         landingPage.style.display = 'none';
+        digitTestDescription.style.display = 'block';
         digitTestContainer.style.display = 'block';
-        startButton.style.display = 'block';
     });
 
-    // Start the digit entry process
-    startButton.addEventListener('click', function() {
-        entryContainer.style.display = 'block';
-        startButton.style.display = 'none';  // Hide the start button once the test begins
-        digitTestDescription.style.display = 'none';  // Optionally hide the description during the test
-        digitInput.focus();
-        if (!started) {
-            started = true;
-            playRound();
-        }
+    examplesButton.addEventListener('click', function() {
+        console.log('onto the practice runs!');
+        wordForm.style.display = 'block';
+        wordTestDescription.style.display = 'none';
+        this.style.display = 'none';
+        setupTask('word');
+        handleExampleRounds();
     });
 
-    // Handle the cue test starting
-    startCueTestButton.addEventListener('click', function() {
-        landingPage.style.display = 'none';
-        cueForm.style.display = 'block';
-        presentCue();
+    // Handle the 'Start Number Task' button click to begin the task
+    startNumberTaskButton.addEventListener('click', function() {
+        this.style.display = 'none';
+        digitTestDescription.style.display = 'none';
+        numberEntryContainer.style.display = 'block';
+        setupTask('number');
+        playRound();
     });
 
-    // Handle form submission
-    cueForm.addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent the default form submission
-        const userResponse = cueInput.value;
-        console.log("Response saved:", userResponse); // Optionally send this to a server
-        cueInput.value = ''; // Clear the input field
-        presentCue(); // Present the next cue
-    });
-
-
-	function presentCue() {
-		console.log("Presenting cue.");
-        if (currentCueIndex < cues.length) {
-            cuesDisplay.textContent = cues[currentCueIndex];
-            currentCueIndex++;
-        } else {
-            cuesDisplay.textContent = "No more cues available.";
-        }
-    }
-
-	function saveCueResponse(response) {
-        // Add logic to save response to a CSV or server
-        console.log("Response saved: ", response);
-    }
-
-
-    // Handling digit input
-    digitInput.addEventListener('input', function() {
+    function setupTask(type) {
         clearTimeout(timeoutId);
-        processInput();
+        console.log("Starting setupTask with type:", type);
+        roundCount = 0;
+        totalRounds = type === 'number' ? 10 : words.length;
+        updateProgressBar();
+        if (type === 'number') {
+            prompt.textContent = 'Enter a digit (1-9):';
+            digitInputField.style.display = 'block';
+            wordInputField.style.display = 'none';
+        } else {
+            prompt.textContent = 'Enter the correct word:';
+            wordForm.style.display = 'block';
+            digitInputField.style.display = 'none';
+            wordInputField.style.display = 'block';
+        }
+    }
+    
+    
+    function playRound() {
+        // This function should clear any previous text and reset styles
+        digitInputField.style.backgroundColor = 'white'; // Reset background color
+        prompt.textContent = taskType === 'number' ? 'Enter a digit (1-9):' : 'Enter the correct word:';
+        digitInputField.value = ''; // Clear previous input
+        resetRoundProgress();
+        
+        if (roundCount < totalRounds) {
+            updateRoundProgressBar(taskType === 'number' ? 1000 : 15000);
+            timeoutId = setTimeout(handleTimeout, taskType === 'number' ? 1010 : 15010); // Ensure round times out if no input
+        } else {
+            endSession();
+        }
+
+        updateProgressBar();
+    }
+
+    function handleTimeout() {
+        roundCount++;
+        if (roundCount >= totalRounds) {
+            endSession();
+        } else {
+            digitInputField.style.backgroundColor = 'red';
+            prompt.textContent = 'Too slow!';
+            setTimeout(playRound, 1000);
+        }
+    } 
+
+    // Handle Input Field for Number Task
+    digitInputField.addEventListener('input', function(e) {
+        processInput(this.value.trim());
+        // Prevent any action if the input is not a single digit between 1-9
+        if (!/^[1-9]$/.test(this.value.trim())) {
+            e.preventDefault();
+        }
+    });
+    // Handle Enter key for Word Task
+    digitInputField.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && taskType === 'word') {
+            e.preventDefault(); // Prevent form submission if part of a form
+            clearTimeout(timeoutId);
+            processInput(this.value.trim());
+        }
     });
 
-    // Function to start a new round
-    function playRound() {
-        if (digitSequence.length >= totalDigits) {
-            endSession();
-            return;
-        }
-        prompt.textContent = 'Enter a digit:';
-        digitInput.style.backgroundColor = 'white';
-        roundProgress.style.backgroundColor = 'orange';
-        digitInput.disabled = false;
-        digitInput.value = '';
-        digitInput.focus();
-        resetRoundProgress();
+    submitButton.addEventListener('click', function() {
+        handleWordInput();
+    });
 
-        timeoutId = setTimeout(() => {
-            if (digitInput.value === '') {
-                digitInput.style.backgroundColor = 'red';
-                roundProgress.style.backgroundColor = 'lightcoral';
-                prompt.textContent = 'Too slow!';
-                playBeep();
-                digitSequence.push('');
-                updateProgressBar();
-                setTimeout(() => {
-                    digitInput.style.backgroundColor = 'white';
-                    digitInput.disabled = false;
-                    digitInput.value = '';
-                    prompt.textContent = 'Enter a digit:';
-                    playRound();
-                }, 2000);
+    function processInput(input) {
+        const correctAnswer = "expectedAnswer"; // Placeholder for the correct answer in the word task.
+    
+        if (taskType === 'number') {
+            const isValidInput = /^[1-9]$/.test(input);
+            if (isValidInput) {
+                digitInputField.style.backgroundColor = 'lightgreen';
+                digitInputField.style.borderColor = 'green';
+                prompt.textContent = 'Correct input!';
+                roundCount++;
+                freezeProgress(1000);
+                clearTimeout(timeoutId); // Clear the timeout to stop the countdown
+                setTimeout(playRound, 1000); // Proceed to next round after a delay
+            } else {
+                digitInputField.style.backgroundColor = 'lightred'; // You might need to define this color in your CSS as 'lightred' isn't standard
+                digitInputField.style.borderColor = 'red';
+                prompt.innerHTML = '<span style="color: red;">Number must be 1-9</span>';
             }
-        }, 1000);
-    }
-
-    // Process user input
-    function processInput() {
-        const digit = digitInput.value.trim();
-        if (/^[1-9]$/.test(digit)) {
-            digitSequence.push(digit);
-            digitInput.style.backgroundColor = 'lightgreen';
-            roundProgress.style.backgroundColor = 'lightgreen'; // Reflect successful input on progress bar
-            pauseRoundProgress(); // Freeze the progress bar
-            setTimeout(() => {
-                digitInput.style.backgroundColor = 'white';
-                digitInput.disabled = false;
-                digitInput.value = '';
-                digitInput.focus(); // Ensure the input field remains focused
-                updateProgressBar();
-                playRound();
-            }, 1000);
+        } else {
+            if (input === correctAnswer) {
+                wordInputField.style.backgroundColor = 'lightgreen';
+                prompt.textContent = 'Correct! The right answer is: ' + correctAnswer;
+            } else {
+                wordInputField.style.backgroundColor = 'red';
+                prompt.textContent = 'Incorrect, try again! Correct answer was: ' + correctAnswer;
+            }
         }
     }
 
-    // Update the progress bar
-    function updateProgressBar() {
-        const progress = (digitSequence.length / totalDigits) * 100;
-        progressBar.style.width = `${progress}%`;
+    function freezeProgress(pause) {
+        console.log('progress frozen');
+        roundProgress.style.transition = 'none';
+        setTimeout(() => {
+            resetRoundProgress();
+        }, pause); // Reset the progress bar after brief pause
     }
 
-    // Reset the round progress bar to start state
-    function resetRoundProgress() {
-        roundProgress.style.transition = 'none';
-        roundProgress.style.width = '100%';
+    function updateProgressBar() {
+        
+        progressBar.style.width = `${(roundCount / totalRounds) * 100}%`;
+        progressLabel.textContent = "Task Progress";
+        progressLabel.style.color = 'green';
+    }
+
+    function updateRoundProgressBar(duration) {
+        console.log('starting round countdown');
         setTimeout(() => {
-            roundProgress.style.transition = 'width 1s linear';
+            roundProgress.style.transition = `width ${duration / 1000}s linear`;
             roundProgress.style.width = '0%';
         }, 10);
     }
 
-    function pauseRoundProgress() {
-        roundProgress.style.transition = 'none';
-        roundProgress.style.width = `${roundProgress.clientWidth}px`; // Pause the current width
-		roundProgress.style.backgroundColor = 'lightgreen';
+    // Reset Round Progress Bar
+    function resetRoundProgress() {
+        console.log('resetting round progress...');
+        roundProgress.style.width = '100%';
+        roundProgress.style.transition = 'none'; 
     }
 
     function playBeep() {
         const audioContext = new AudioContext();
         const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
         oscillator.type = 'sine';
-        oscillator.frequency.value = 440;
-        gainNode.gain.value = 0.2;
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
+        oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+        oscillator.connect(audioContext.destination);
         oscillator.start();
         setTimeout(() => oscillator.stop(), 200);
     }
 
     function endSession() {
         clearTimeout(timeoutId);
+        digitInputField.disabled = true;
+        digitInputField.style.display = 'none';
+        progressBar.style.display = 'none';
+        roundProgress.style.display = 'none';
         prompt.textContent = 'Session completed. Thank you!';
-        digitInput.disabled = true;
+    
+        if (taskType === 'number') {
+            taskType = 'word';  // Update task type here
+            transitionToWordTask(); // Call transition function directly here
+        } else {
+            // Final completion of all tasks
+            wordInputField.disabled = true;
+            wordInputField.style.display = 'none';
+            submitButton.style.display = 'none';
+            progressBar.style.display = 'none';
+            roundProgress.style.display = 'none';
+            prompt.textContent = 'Session completed. Thank you!';
+            prompt.style.display = 'block';
+            taskType = null;
+            prompt.textContent += ' All tasks completed.';
+        }
+    }
+    
+    wordInputField.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && taskType === 'word') {
+            e.preventDefault();
+            handleWordInput();
+            clearTimeout();
+            processInput(this.value.trim());
+            displayResult();
+        }
+    });
+
+    function handleWordInput() {
+        const input = wordInputField.value.trim();
+        processInput(input);
+        displayResult(input);
+    }
+    
+    
+    function transitionToWordTask() {
+        console.log("Transitioning to Word Task");
+        digitTestContainer.style.display = 'none';
+        startWordTaskButton.style.display = 'none';
+        numberEntryContainer.style.display = 'none';
+        wordForm.style.display = 'block';
+        wordEntryContainer.style.display = 'none';
+        wordInputField.style.display = 'none'; // Initially hide input field
+        submitButton.style.display = 'none'; // Hide submit button
+        examplesButton.style.display = 'block'; // Show a next button specifically for the word task
+        
     }
 
+    function displayResult(input) {
+        setTimeout(() => {
+            wordInputField.value = '';
+            wordInputField.style.backgroundColor = 'white';
+            if (++currentwordIndex < words.length) {
+                prompt.textContent = words[currentwordIndex];
+            } else {
+                endSession();
+            }
+        }, 5000); // Show result for 5 seconds
+    }
+    
+    
+   // EXAMPLE METHODS
+   
+   function handleExampleRounds() {
+        console.log('example round...');
+        wordForm.style.display = 'block';
+        wordEntryContainer.style.display = 'block';
+        wordInputField.style.display = 'block';
+        submitButton.style.display = 'block';
+
+        console.log('showing first sample cue');
+        prompt.textContent = examples[exampleIndex].cue; // Show first example cue
+        prompt.style.display = 'block';
+
+        examplesButton.style.display = 'none'; // Hide next button during examples
+        progressBar.style.display = 'none'; // Hide progress bars during examples
+        roundProgress.style.display = 'none';
+
+        // Ensuring the form does not submit traditionally
+        if (wordForm) {
+            wordForm.onsubmit = function(event) {
+                event.preventDefault();
+            };
+        }
+
+        submitButton.onclick = function(event) {
+            event.preventDefault(); // Prevent the default form submission when the submit button is clicked
+            processExampleInput();
+        };
+
+        wordInputField.onkeypress = function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent the default form submission on enter key press
+                processExampleInput();
+            }
+    };
+}
+
+function processExampleInput() {
+
+    const input = wordInputField.value.trim();
+    const correctAnswer = examples[exampleIndex].answer;
+    
+    if (input.toLowerCase() === correctAnswer.toLowerCase()) {
+        wordInputField.style.backgroundColor = 'lightgreen';
+        prompt.innerHTML = `Correct, the answer was <span style="color: green;">${correctAnswer}</span>`;
+    } else {
+        wordInputField.style.backgroundColor = 'lightred';
+        prompt.innerHTML = `Incorrect, the answer was <span style="color: lightred;">${correctAnswer}</span>`;
+    }
+    setTimeout(() => {
+        if (++exampleIndex < examples.length) {
+            // Move to the next example
+            prompt.textContent = examples[exampleIndex].cue;
+            wordInputField.value = '';
+            wordInputField.style.backgroundColor = 'white';
+        } else {
+            // All examples are done, show start word task button
+            wordInputField.style.display = 'none';
+            submitButton.style.display = 'none';
+            startWordTaskButton.style.display = 'block'; // Now show start button to begin the actual task
+            prompt.style.display = 'none';
+        }
+    }, 3000); // Display correct answer for 3 seconds
+}
 });

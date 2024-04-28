@@ -10,13 +10,15 @@
 <body style="font-family: 'Roboto Condensed', sans-serif;">
     <div class="container">
         <div id="landing-page">
-            <h1>Welcome to Our Psychology Tests!</h1>
-            <p>Select the test you would like to participate in:</p>
-            <div class="button-container">
-                <button id="start-digit-test">Digit Entry Test</button>
-                <button id="start-cue-test">Cue-based Test</button>
-            </div>
+            <h1>Welcome!</h1>
+            <label for="prolific-id-input">Enter your Prolific ID:</label>
+            <input type="text" id="prolific-id-input" placeholder="Enter your Prolific ID here">
+            <button id="next-landing">Next</button>
         </div>
+
+
+        <!-- Prompt for all tests -->
+        <p id="prompt" style="font-size: 16px; color: #333;"></p>
 
         <!-- Digit Entry Test Container -->
         <div id="digit-test-container" style="display: none;">
@@ -38,35 +40,36 @@
                 do your best to enter numbers each second. The green bar at the bottom will indicate
                 how much longer you have left in the task.
             </p>
-            <button id="start-button">Start Digit Test</button>
-            <div id="entry-container" style="display: none;">
-                <p id="prompt">Enter a digit:</p>
+            <button id="start-number-task">Start Number Task</button>
+            <div id="digit-entry-container" style="display: none;">
                 <input type="text" id="digit-input" maxlength="1">
-                <div id="progress-bar" style="width: 100%; background-color: #eee; height: 20px; margin-top: 20px;">
+                <div id="progress-bar" style="position: absolute; bottom: 0; width: 100%; background-color: #eee; height: 20px;">
                     <div id="progress" style="height: 100%; background-color: green; width: 0%;"></div>
                 </div>
+                <p id="progress-label" style="position: absolute; bottom: 25px; width: 100%; text-align: center; color: green;">Task Progress</p>
                 <div id="round-progress-bar" style="width: 100%; background-color: #ccc; height: 10px; margin-top: 5px;">
                     <div id="round-progress" style="height: 100%; background-color: orange; width: 100%;"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Cue-based Test Container -->
-        <form id="cue-form" style="display: none;">
-            <div id="cue-test-container">
-                <p id="cue-test-description">
-                    For this next task, you will be presented with 3 “cue words.” Your task is to
+        <!-- word-based Test Container -->
+        <form id="word-form" style="display: none;">
+            <div id="word-test-container">
+                <p id="word-test-description">
+                    For this next task, you will be presented with 3 cue words.” Your task is to
                     determine a single word that is commonly associated with all three cue words.
                     You will have 15 seconds to solve each problem. For example, if given the cue
                     words: carpet, alert, and ink. What would be the correct response? Red. As a second
                     example, if given the cue words: cane, daddy, and plum. What would be the correct
                     response? Sugar. 
-                </p>      
-                <p id="cue-prompt">Please enter the word that associates with these cues:</p>
-                <p id="cues">word1 / word2 / word3</p>
-                <input type="text" id="cue-input">
-                <div class="button-container">
-                    <button type="submit" id="submit-cue">Submit</button>
+                </p>
+                <button id="start-word-task">Start Word Task</button>  
+                <button id="examples-button">Try an example...</button> 
+                <div id="word-entry-container" style="display: none;">
+                    <input type="text" id="word-input">
+                    <button type="button" id="submit-word" style="display: none;">Submit</button>
+                </div>
                 </div>
             </div>
         </form>

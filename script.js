@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('hello world!');
+    console.log('hello world! iteration 4 :-)');
     const landingPage = document.getElementById('landing-page');
+    const profilicIdInput = document.getElementById('prolific-id-input');
     const digitTestContainer = document.getElementById('digit-test-container');
     const digitTestDescription = document.getElementById('digit-test-description');
     const numberEntryContainer = document.getElementById('digit-entry-container');
@@ -22,12 +23,50 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let timeoutId;
     let roundCount = 0;
-    let digitSequence = [];
+
+    let userData = {
+        'profilic_id': '', // replace 'user_profilic_id' with the actual profilic ID of the user
+        'numbers': [],
+        'words': []
+    };
+
     let totalRounds = 10;
     let taskType = 'number';
+    let wordTaskStarted = 'false';
 
     // Setup word test information
-    const words = ["Piece / mind / dating", "Hound / pressure / shot", "Nuclear / feud / album", "Carpet / alert / ink", "Main / sweeper / light"];
+    // from michelle: IDEALLY these would be read from a separate file, but they've been hardcoded for now
+    const words = [
+        { cue: "Piece/mind/dating", answer: "game" },
+        { cue: "Hound/pressure/shot", answer: "Blood" },
+        { cue: "Nuclear/feud/album", answer: "Family" },
+        { cue: "Main/sweeper/light", answer: "Street" },
+        { cue: "Basket/eight/snow", answer: "ball" },
+        { cue: "Food/forward/break", answer: "fast" },
+        { cue: "Cottage/swiss/cake", answer: "cheese" },
+        { cue: "Night/wrist/stop", answer: "watch" },
+        { cue: "Show/life/row", answer: "Boat" },
+        { cue: "River/note/account", answer: "Bank" },
+        { cue: "Loser/throat/spot", answer: "Sore" },
+        { cue: "Sense/courtesy/place", answer: "Common" },
+        { cue: "Dew/comb/bee", answer: "Honey" },
+        { cue: "Fish/mine/rush", answer: "Gold" },
+        { cue: "Political/surprise/line", answer: "Party" },
+        { cue: "Print/berry/bird", answer: "Blue" },
+        { cue: "Preserve/range/tropical", answer: "Forest" },
+        { cue: "Fur/rack/tail", answer: "Coat" },
+        { cue: "Flake/mobile/cone", answer: "Snow" },
+        { cue: "Fountain/baking/pop", answer: "Soda" },
+        { cue: "Safety/cushion/point", answer: "Pin" },
+        { cue: "Worm/shelf/end", answer: "Book" },
+        { cue: "Opera/hand/dish", answer: "Soap" },
+        { cue: "Cream/skate/water", answer: "Ice" },
+        { cue: "Duck/fold/dollar", answer: "Bill" },
+        { cue: "Aid/rubber/wagon", answer: "Band" },
+        { cue: "Cracker/fly/flight", answer: "Fire" },
+        { cue: "Dream/break/light", answer: "Day" }
+    ];
+    
     const examples = [
         { cue: "carpet / alert / ink", answer: "red" },
         { cue: "cane / daddy / plum", answer: "sugar" }
@@ -39,19 +78,34 @@ document.addEventListener('DOMContentLoaded', function() {
     startWordTaskButton.addEventListener('click', function() {
         console.log('starting word task');
         this.style.display = 'none';
+        wordTaskStarted = 'true';
+
+        // all the word test goodness
         wordTestDescription.style.display = 'none';
         wordForm.style.display = 'block';
         wordTestContainer.style.display = 'block';
         wordInputField.style.display = 'block';
         submitButton.style.display = 'block';
-        prompt.textContent = words[currentwordIndex];
+        prompt.textContent = words[currentwordIndex].cue;
+        console.log('presenting actual word cue (not example!)'); // debugging
         prompt.style.display = 'block';
+
+        // reinstate progress bars
+        numberEntryContainer.style.display = 'block';
+        digitInputField.style.display = 'none';
+        progressLabel.style.display = 'block';
+        roundProgress.style.display = 'block';
+        progressBar.style.display = 'block';
+
+        setupTask('word');
+        playRound();
     });
     
     nextLandingButton.addEventListener('click', function() {
         landingPage.style.display = 'none';
         digitTestDescription.style.display = 'block';
         digitTestContainer.style.display = 'block';
+        userData.profilic_id = profilicIdInput.value; // Save the Prolific ID when the next button is clicked
     });
 
     examplesButton.addEventListener('click', function() {
@@ -92,6 +146,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     
     function playRound() {
+
+        if (taskType === 'word' && wordTaskStarted === 'false') return;
+
+        console.log('starting round!');
         // This function should clear any previous text and reset styles
         digitInputField.style.backgroundColor = 'white'; // Reset background color
         prompt.textContent = taskType === 'number' ? 'Enter a digit (1-9):' : 'Enter the correct word:';
@@ -106,15 +164,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         updateProgressBar();
+        playBeep();
     }
 
     function handleTimeout() {
+        if (taskType === 'word' && wordTaskStarted === 'false') return;
         roundCount++;
         if (roundCount >= totalRounds) {
             endSession();
         } else {
             digitInputField.style.backgroundColor = 'red';
             prompt.textContent = 'Too slow!';
+            if (taskType === 'number') {
+                userData.numbers.push('');
+            }
+            else if (taskType === 'word') {
+                userData.words.push('');
+            }
             setTimeout(playRound, 1000);
         }
     } 
@@ -141,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function processInput(input) {
-        const correctAnswer = "expectedAnswer"; // Placeholder for the correct answer in the word task.
+        const correctAnswer = words[currentwordIndex].answer; // Placeholder for the correct answer in the word task.
     
         if (taskType === 'number') {
             const isValidInput = /^[1-9]$/.test(input);
@@ -150,24 +216,51 @@ document.addEventListener('DOMContentLoaded', function() {
                 digitInputField.style.borderColor = 'green';
                 prompt.textContent = 'Correct input!';
                 roundCount++;
+                userData.numbers.push(input); // Save the number input by the user
                 freezeProgress(1000);
                 clearTimeout(timeoutId); // Clear the timeout to stop the countdown
                 setTimeout(playRound, 1000); // Proceed to next round after a delay
             } else {
-                digitInputField.style.backgroundColor = 'lightred'; // You might need to define this color in your CSS as 'lightred' isn't standard
-                digitInputField.style.borderColor = 'red';
+                digitInputField.style.backgroundColor = 'lightcoral'; 
+                digitInputField.style.borderColor = 'lightcoral';
                 prompt.innerHTML = '<span style="color: red;">Number must be 1-9</span>';
             }
         } else {
             if (input === correctAnswer) {
                 wordInputField.style.backgroundColor = 'lightgreen';
                 prompt.textContent = 'Correct! The right answer is: ' + correctAnswer;
+                userData.words.push(input); // Save the word input by the user
+                currentwordIndex++;
             } else {
-                wordInputField.style.backgroundColor = 'red';
+                wordInputField.style.backgroundColor = 'lightcoral';
                 prompt.textContent = 'Incorrect, try again! Correct answer was: ' + correctAnswer;
+                currentwordIndex++;
             }
         }
     }
+
+    function downloadCSV() {
+        let csvContent = 'profilic_id,' + userData.profilic_id + '\n';
+    
+        for (let i = 0; i < userData.numbers.length; i++) {
+            csvContent += 'N' + (i + 1) + ',' + userData.numbers[i] + '\n';
+        }
+    
+        for (let i = 0; i < userData.words.length; i++) {
+            csvContent += 'W' + (i + 1) + ',' + userData.words[i] + '\n';
+        }
+    
+        let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        let link = document.createElement("a");
+        let url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "user_data.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    
 
     function freezeProgress(pause) {
         console.log('progress frozen');
@@ -230,7 +323,8 @@ document.addEventListener('DOMContentLoaded', function() {
             prompt.textContent = 'Session completed. Thank you!';
             prompt.style.display = 'block';
             taskType = null;
-            prompt.textContent += ' All tasks completed.';
+            prompt.textContent += ' All tasks completed. You will be prompted to download a CSV file with your inputs.';
+            downloadCSV();
         }
     }
     
@@ -239,15 +333,16 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             handleWordInput();
             clearTimeout();
-            processInput(this.value.trim());
-            displayResult();
         }
     });
 
     function handleWordInput() {
         const input = wordInputField.value.trim();
-        processInput(input);
-        displayResult(input);
+
+        if (wordTaskStarted === 'true') {
+            processInput(input);
+            displayResult(input);
+        }
     }
     
     
@@ -269,7 +364,8 @@ document.addEventListener('DOMContentLoaded', function() {
             wordInputField.value = '';
             wordInputField.style.backgroundColor = 'white';
             if (++currentwordIndex < words.length) {
-                prompt.textContent = words[currentwordIndex];
+                prompt.textContent = words[currentwordIndex].cue;
+                console.log('displaying word NOT example');
             } else {
                 endSession();
             }
@@ -303,33 +399,43 @@ document.addEventListener('DOMContentLoaded', function() {
 
         submitButton.onclick = function(event) {
             event.preventDefault(); // Prevent the default form submission when the submit button is clicked
-            processExampleInput();
+            if (wordTaskStarted === 'false') {
+                processExampleInput();
+            } else {
+                handleWordInput();
+            }
         };
 
         wordInputField.onkeypress = function(event) {
             if (event.key === 'Enter') {
                 event.preventDefault(); // Prevent the default form submission on enter key press
-                processExampleInput();
+                if (wordTaskStarted === 'false') {
+                    processExampleInput();
+                } else {
+                    handleWordInput();
+                }
             }
     };
 }
 
 function processExampleInput() {
 
+    console.log('processing example input...');
     const input = wordInputField.value.trim();
-    const correctAnswer = examples[exampleIndex].answer;
+    let correctAnswer = examples[exampleIndex].answer;
     
     if (input.toLowerCase() === correctAnswer.toLowerCase()) {
         wordInputField.style.backgroundColor = 'lightgreen';
         prompt.innerHTML = `Correct, the answer was <span style="color: green;">${correctAnswer}</span>`;
     } else {
         wordInputField.style.backgroundColor = 'lightred';
-        prompt.innerHTML = `Incorrect, the answer was <span style="color: lightred;">${correctAnswer}</span>`;
+        prompt.innerHTML = `Incorrect, the answer was <span style="color: lightcoral;">${correctAnswer}</span>`;
     }
     setTimeout(() => {
         if (++exampleIndex < examples.length) {
             // Move to the next example
             prompt.textContent = examples[exampleIndex].cue;
+            correctAnswer = examples[exampleIndex].answer;
             wordInputField.value = '';
             wordInputField.style.backgroundColor = 'white';
         } else {

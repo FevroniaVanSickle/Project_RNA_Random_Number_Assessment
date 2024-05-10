@@ -529,4 +529,5 @@ function processExampleInput() {
     }, 3000); // display correct answer for 3 seconds
 }
 
+})
 

@@ -16,6 +16,14 @@ body {
     max-width: 600px; /* Adjust based on your preference */
 }
 
+#main-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100vh; /* Full viewport height */
+}
+
+
 /* Styling for the landing page */
 #landing-page {
     padding: 20px;
@@ -55,6 +63,10 @@ button:hover {
     text-align: center;
 }
 
+#progress-container {
+    align-items: center;
+}
+
 /* Progress bar container */
 #progress-bar {
     width: 100%;
@@ -63,7 +75,7 @@ button:hover {
     margin-top: 20px;
 }
 
-#progress {
+#task-progress {
     height: 100%;
     background-color: green;
     width: 0%;

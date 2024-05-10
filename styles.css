@@ -64,7 +64,12 @@ button:hover {
 }
 
 #progress-container {
-    align-items: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px; /* Adjust based on your preference */
+    text-align: center;
 }
 
 /* Progress bar container */
@@ -75,9 +80,17 @@ button:hover {
     margin-top: 20px;
 }
 
+#progress-label {
+    position: absolute;
+    width: 100%;
+    color: green; /* Ensures the label is visible on a green background */
+    z-index: 1; /* Puts the label above the progress bar */
+}
+
 #task-progress {
+    position: absolute;
+    width: 0%;
     height: 100%;
     background-color: green;
-    width: 0%;
     transition: width 0.5s ease-in-out;
 }

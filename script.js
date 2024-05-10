@@ -108,13 +108,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // all the word test stuff
         wordTestDescription.style.display = 'none';
         wordForm.style.display = 'block';
-        wordTestContainer.style.display = 'block';
-        wordInputField.style.display = 'block';
-        submitButton.style.display = 'block';
 
-        wordEntryContainer.style.visibility = 'hidden';
-        wordInputField.style.visibility = 'hidden'; // Initially hide input field
-        submitButton.style.visibility = 'hidden'; // Hide submit button
+        wordTestContainer.style.display = 'block';
+        wordEntryContainer.style.visibility = 'visible';
+
+        wordInputField.style.display = 'block';
+        wordInputField.style.visibility = 'visible';
+
+        submitButton.style.display = 'block';
+        submitButton.style.visibility = 'visible';
+
+        wordEntryContainer.style.display = 'block';
+        wordEntryContainer.style.visibility = 'visible';
+
+        prompt.style.display = 'block';
+        prompt.style.visibility = 'visible';
 
         // reinstate progress bars
         digitInputField.style.display = 'none';
@@ -149,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
         roundCount = 0;
         totalRounds = type === 'number' ? 10 : words.length;
 
-        updateProgressBar();
+        updateTaskProgressBar();
         if (type === 'number') {
             prompt.textContent = 'Enter a digit (1-9):';
             digitInputField.style.display = 'block';
@@ -165,11 +173,53 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // TASK / ROUND FUNCTIONS
+
+    function freezeProgress(pause) {
+        console.log('progress frozen');
+        roundProgress.style.transition = 'none';
+        setTimeout(() => {
+            resetRoundProgress();
+        }, pause); // reset the progress bar after brief pause
+    }
+
+    function updateTaskProgressBar() {
+        taskProgress.style.width = `${(roundCount / totalRounds) * 100}%`;
+        progressLabel.textContent = "Task Progress";
+        progressLabel.style.color = 'green';
+    }
+
+    function updateRoundProgressBar(duration) {
+        console.log('starting round countdown');
+        setTimeout(() => {
+            roundProgress.style.transition = `width ${duration / 1000}s linear`;
+            roundProgress.style.width = '0%';
+        }, 10);
+    }
+
+    // Reset Round Progress Bar
+    function resetRoundProgress() {
+        console.log('resetting round progress...');
+        roundProgress.style.width = '100%';
+        roundProgress.style.transition = 'none'; 
+    }
+
+    function playBeep() {
+        const audioContext = new AudioContext();
+        const oscillator = audioContext.createOscillator();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+        oscillator.connect(audioContext.destination);
+        oscillator.start();
+        setTimeout(() => oscillator.stop(), 200);
+    }
     
     function playRound() {
 
+        updateTaskProgressBar();
         playBeep();
         resetRoundProgress();
+
+        console.log("starting round...");
     
         if (taskType === 'word' && wordTaskStarted === 'false') return;
 
@@ -185,14 +235,11 @@ document.addEventListener('DOMContentLoaded', function() {
             wordInputField.value = ''; // Clear previous input
         }
 
-        // This function should clear any previous text and reset styles
-
-        prompt.textContent = taskType === 'number' ? 'Enter a digit (1-9):' : 'Enter the correct word: ';
+        prompt.textContent = taskType === 'number' ? 'Enter a digit (1-9):' : 'Enter the word that best goes with the following: ';
 
         if (taskType === 'word'){
-            prompt.textContent += words[currentwordIndex].cue;    
+            prompt.textContent += words[currentwordIndex].cue;
         }
-        
         
         if (roundCount < totalRounds) {
             updateRoundProgressBar(taskType === 'number' ? 1000 : 15000);
@@ -201,25 +248,26 @@ document.addEventListener('DOMContentLoaded', function() {
             endSession();
         }
 
-        updateTaskProgressBar();
-
 
     }
 
     function handleTimeout() {
         if (taskType === 'word' && wordTaskStarted === 'false') return;
+
         roundCount++;
         if (roundCount >= totalRounds) {
             endSession();
-        } else {
-            digitInputField.style.backgroundColor = 'lightcoral';
+        } else {            
             prompt.textContent = 'Too slow!';
             if (taskType === 'number') {
+                digitInputField.style.backgroundColor = 'lightcoral';
                 userData.numbers.push('');
             }
             else if (taskType === 'word') {
+                wordInputField.style.backgroundColor = 'lightcoral';
                 userData.words.push('');
             }
+
             setTimeout(playRound, 1000);
         }
     } 
@@ -236,7 +284,6 @@ document.addEventListener('DOMContentLoaded', function() {
     wordInputField.addEventListener('keypress', function(e) {
         if (e.key === 'Enter' && taskType === 'word') {
             e.preventDefault(); // prevent form submission 
-            clearTimeout(timeoutId);
             processInput(this.value.trim());
         }
     });
@@ -264,17 +311,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 digitInputField.style.borderColor = 'lightcoral';
                 prompt.innerHTML = '<span style="color: lightcoral;">Number must be 1-9</span>';
             }
-        } else {
+        } else if (taskType === 'word') {
             if (input === correctAnswer) {
                 wordInputField.style.backgroundColor = 'lightgreen';
+                wordInputField.style.borderColor = 'green';
                 prompt.textContent = 'Correct! The right answer is: ' + correctAnswer;
+                roundCount++;
                 userData.words.push(input); // save the word input by the user
                 freezeProgress(1000);
                 clearTimeout(timeoutId);
                 setTimeout(playRound, 1000);
             } else {
                 wordInputField.style.backgroundColor = 'lightcoral';
+                wordInputField.style.borderColor = 'lightcoral';
                 prompt.textContent = 'Incorrect! Correct answer was: ' + correctAnswer;
+                roundCount++;
+                userData.words.push(input);
+                freezeProgress(1000);
+                clearTimeout(timeoutId); // stop countdown
+                setTimeout(playRound, 1000);
             }
         }
     }
@@ -313,46 +368,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
 
-    function freezeProgress(pause) {
-        console.log('progress frozen');
-        roundProgress.style.transition = 'none';
-        setTimeout(() => {
-            resetRoundProgress();
-        }, pause); // reset the progress bar after brief pause
-    }
-
-    function updateProgressBar() {
-        
-        taskProgress.style.width = `${(roundCount / totalRounds) * 100}%`;
-        progressLabel.textContent = "Task Progress";
-        progressLabel.style.color = 'green';
-    }
-
-    function updateRoundProgressBar(duration) {
-        console.log('starting round countdown');
-        setTimeout(() => {
-            roundProgress.style.transition = `width ${duration / 1000}s linear`;
-            roundProgress.style.width = '0%';
-        }, 10);
-    }
-
-    // Reset Round Progress Bar
-    function resetRoundProgress() {
-        console.log('resetting round progress...');
-        roundProgress.style.width = '100%';
-        roundProgress.style.transition = 'none'; 
-    }
-
-    function playBeep() {
-        const audioContext = new AudioContext();
-        const oscillator = audioContext.createOscillator();
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
-        oscillator.connect(audioContext.destination);
-        oscillator.start();
-        setTimeout(() => oscillator.stop(), 200);
-    }
-
     function endSession() {
         clearTimeout(timeoutId);
         digitInputField.disabled = true;
@@ -367,10 +382,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // final completion of all tasks
             wordInputField.disabled = true;
             wordInputField.style.display = 'none';
-            submitButton.style.display = 'none';
+            submitButton.style.visibility = 'hidden';
 
             prompt.textContent = 'Session completed. Thank you! You will be prompted to download a CSV file with your inputs.';
             prompt.style.visibility = 'visible';
+
             taskType = null;
             downloadCSV();
         }
@@ -380,7 +396,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Enter' && taskType === 'word') {
             e.preventDefault();
             handleWordInput();
-            clearTimeout();
         }
     });
 
@@ -391,19 +406,20 @@ document.addEventListener('DOMContentLoaded', function() {
             processInput(input);
             displayResult(input);
         }
+
     }
     
     
     function transitionToWordTask() {
 
-        roundCount = 0;
         console.log("Transitioning to Word Task");
         digitTestContainer.style.display = 'none';
         startWordTaskButton.style.display = 'none';
+        submitButton.style.display = 'none';
 
         progressContainer.style.visibility = 'hidden';
         wordForm.style.display = 'block';
-        wordEntryContainer.style.visibility = 'hidden';
+        wordEntryContainer.style.display = 'block';
         examplesButton.style.display = 'block'; // show button for examples
         
     }
@@ -463,11 +479,15 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('example round...');
         wordForm.style.display = 'block';
         wordEntryContainer.style.display = 'block';
-        wordEntryContainer.style.visibilty = 'visible';
+
+        wordInputField.style.visibility = 'visible';
+        submitButton.style.display = 'block';
+        submitButton.style.visibility = 'visible';
 
         console.log('showing first sample cue');
         prompt.textContent = examples[exampleIndex].cue; // show first example cue
         prompt.style.visibility = 'visible';
+
 
         examplesButton.style.display = 'none'; 
 
@@ -528,6 +548,4 @@ function processExampleInput() {
         }
     }, 3000); // display correct answer for 3 seconds
 }
-
 })
-

@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let totalRounds = 10;
     let taskType = 'number';
-    let wordTaskStarted = 'false';
+    let wordTaskStarted = false;
 
     // Setup word test information
     // from michelle: IDEALLY these would be read from a separate file, but they've been hardcoded for now
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
     startWordTaskButton.addEventListener('click', function() {
         console.log('starting word task');
         this.style.display = 'none';
-        wordTaskStarted = 'true';
+        wordTaskStarted = true;
 
         // all the word test stuff
         wordTestDescription.style.display = 'none';
@@ -171,16 +171,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function manageProgressBar(pause) {
+        console.log('Freezing and resetting progress bar...');
+        // Immediately stop any ongoing transition to freeze the current state
+        roundProgress.style.transition = 'none';
+        roundProgress.style.width = '100%';  // Assuming you want to freeze it fully filled
+    
+        // Set a timeout to reset the progress bar after the specified pause
+        setTimeout(() => {
+            console.log('Resetting progress bar...');
+            roundProgress.style.transition = 'none';
+            roundProgress.style.width = '100%';  // Resets the bar to full width
+        }, pause);
+    }
+    
 
     // TASK / ROUND FUNCTIONS
-
-    function freezeProgress(pause) {
-        console.log('progress frozen');
-        roundProgress.style.transition = 'none';
-        setTimeout(() => {
-            resetRoundProgress();
-        }, pause); // reset the progress bar after brief pause
-    }
 
     function updateTaskProgressBar() {
         taskProgress.style.width = `${(roundCount / totalRounds) * 100}%`;
@@ -196,12 +202,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 10);
     }
 
-    // Reset Round Progress Bar
-    function resetRoundProgress() {
-        console.log('resetting round progress...');
-        roundProgress.style.width = '100%';
-        roundProgress.style.transition = 'none'; 
-    }
 
     function playBeep() {
         const audioContext = new AudioContext();
@@ -217,15 +217,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         updateTaskProgressBar();
         playBeep();
-        resetRoundProgress();
 
-        console.log("starting round...");
-    
-        if (taskType === 'word' && wordTaskStarted === 'false') return;
+        if (taskType === 'word' && wordTaskStarted === false) return;
 
         console.log('starting round!');
 
         if (taskType === 'number') {
+            console.log("starting number round...");
             digitInputField.style.backgroundColor = 'white'; // Reset background color
             digitInputField.value = ''; // Clear previous input
         }
@@ -238,6 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
         prompt.textContent = taskType === 'number' ? 'Enter a digit (1-9):' : 'Enter the word that best goes with the following: ';
 
         if (taskType === 'word'){
+            console.log("starting word round...");
             prompt.textContent += words[currentwordIndex].cue;
         }
         
@@ -252,9 +251,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function handleTimeout() {
-        if (taskType === 'word' && wordTaskStarted === 'false') return;
+        if (taskType === 'word' && wordTaskStarted === false) return;
 
-        roundCount++;
         if (roundCount >= totalRounds) {
             endSession();
         } else {            
@@ -262,10 +260,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (taskType === 'number') {
                 digitInputField.style.backgroundColor = 'lightcoral';
                 userData.numbers.push('');
+                roundCount++;
             }
             else if (taskType === 'word') {
                 wordInputField.style.backgroundColor = 'lightcoral';
                 userData.words.push('');
+                roundCount++;
             }
 
             setTimeout(playRound, 1000);
@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 prompt.textContent = 'Correct input!';
                 roundCount++;
                 userData.numbers.push(input); // save the number input by the user
-                freezeProgress(1000);
+                manageProgressBar(1000);
                 clearTimeout(timeoutId); // stop countdown
                 setTimeout(playRound, 1000); // proceed to next round after a delay
             } else {
@@ -315,19 +315,19 @@ document.addEventListener('DOMContentLoaded', function() {
             if (input === correctAnswer) {
                 wordInputField.style.backgroundColor = 'lightgreen';
                 wordInputField.style.borderColor = 'green';
-                prompt.textContent = 'Correct! The right answer is: ' + correctAnswer;
+                prompt.innerHTML = `Correct! The answer was <span style="color: green;">${correctAnswer}</span>`;
                 roundCount++;
                 userData.words.push(input); // save the word input by the user
-                freezeProgress(1000);
+                manageProgressBar(1000);
                 clearTimeout(timeoutId);
                 setTimeout(playRound, 1000);
             } else {
                 wordInputField.style.backgroundColor = 'lightcoral';
                 wordInputField.style.borderColor = 'lightcoral';
-                prompt.textContent = 'Incorrect! Correct answer was: ' + correctAnswer;
+                prompt.innerHTML = `Incorrect, the answer was <span style="color: lightcoral;">${correctAnswer}</span>`;
                 roundCount++;
                 userData.words.push(input);
-                freezeProgress(1000);
+                manageProgressBar(1000);
                 clearTimeout(timeoutId); // stop countdown
                 setTimeout(playRound, 1000);
             }
@@ -402,7 +402,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleWordInput() {
         const input = wordInputField.value.trim();
 
-        if (wordTaskStarted === 'true') {
+        if (wordTaskStarted === true) {
             processInput(input);
             displayResult(input);
         }
@@ -500,7 +500,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         submitButton.onclick = function(event) {
             event.preventDefault(); // prevent the default form submission when the submit button is clicked
-            if (wordTaskStarted === 'false') {
+            if (wordTaskStarted === false) {
                 processExampleInput();
             } else {
                 handleWordInput();
@@ -510,7 +510,7 @@ document.addEventListener('DOMContentLoaded', function() {
         wordInputField.onkeypress = function(event) {
             if (event.key === 'Enter') {
                 event.preventDefault(); // prevent the default form submission on enter key press
-                if (wordTaskStarted === 'false') {
+                if (wordTaskStarted === false) {
                     processExampleInput();
                 } else {
                     handleWordInput();

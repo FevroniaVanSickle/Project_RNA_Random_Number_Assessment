@@ -1,0 +1,96 @@
+/* General body styling */
+body {
+    font-family: 'Roboto Condensed', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full viewport height */
+    background-color: #f4f4f4;
+}
+
+.container {
+    text-align: center;
+    width: 100%;
+    max-width: 600px; /* Adjust based on your preference */
+}
+
+#main-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100vh; /* Full viewport height */
+}
+
+
+/* Styling for the landing page */
+#landing-page {
+    padding: 20px;
+}
+
+/* Button styling */
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: #007BFF;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Center buttons within a container */
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+/* Entry container styling */
+#entry-container {
+    margin-top: 20px;
+}
+
+#digit-input {
+    font-size: 20px;
+    padding: 10px;
+    width: 50px;
+    text-align: center;
+}
+
+#progress-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px; /* Adjust based on your preference */
+    text-align: center;
+}
+
+/* Progress bar container */
+#progress-bar {
+    width: 100%;
+    background-color: #eee;
+    height: 20px;
+    margin-top: 20px;
+}
+
+#progress-label {
+    position: absolute;
+    width: 100%;
+    color: green; /* Ensures the label is visible on a green background */
+    z-index: 1; /* Puts the label above the progress bar */
+}
+
+#task-progress {
+    position: absolute;
+    width: 0%;
+    height: 100%;
+    background-color: green;
+    transition: width 0.5s ease-in-out;
+}

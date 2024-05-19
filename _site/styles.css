@@ -1,17 +1,18 @@
 /* General body styling */
 body {
     font-family: 'Roboto Condensed', sans-serif;
-    margin: 0;
-    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
+    text-align: center;
     height: 100vh; /* Full viewport height */
     background-color: #f4f4f4;
 }
 
 .container {
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 100%;
     max-width: 600px; /* Adjust based on your preference */
 }
@@ -19,15 +20,26 @@ body {
 #main-container {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
     height: 100vh; /* Full viewport height */
 }
 
-
 /* Styling for the landing page */
 #landing-page {
-    padding: 20px;
+    padding: 70px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    gap: 10px;
 }
+
+h1 {
+    font-size: 30px;
+    }
 
 /* Button styling */
 button {
@@ -54,6 +66,7 @@ button:hover {
 /* Entry container styling */
 #entry-container {
     margin-top: 20px;
+    text-align: center;
 }
 
 #digit-input {

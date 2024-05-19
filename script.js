@@ -1,3 +1,4 @@
+const fs = require("fs");
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('hello world! iteration 4 :-)');
@@ -46,53 +47,52 @@ document.addEventListener('DOMContentLoaded', function() {
     let wordTaskStarted = false;
 
     // Setup word test information
-    const fs = require("fs");
-    const csvFilePath = "wordTask.csv";
+    const csvFilePath = "./wordTask.csv";
 
-    // Create a read stream
-    const readStream = fs.createReadStream(csvFilePath);
+    // // Create a read stream
+    // const readStream = fs.createReadStream(csvFilePath);
 
-    let text = "";
+    // let text = "";
 
-    // Event handler for reading data from the stream
-    readStream.on('data', (chunk) => {
-        // Append the chunk of data to the text
-        text += chunk;
-    });
+    // // Event handler for reading data from the stream
+    // readStream.on('data', (chunk) => {
+    //     // Append the chunk of data to the text
+    //     text += chunk;
+    // });
 
-    let words = [];
+    // let words = [];
 
-    // Event handler for end of file
-    readStream.on('end', () => {
-        let words = csvToArray(text);
+    // // Event handler for end of file
+    // readStream.on('end', () => {
+    //     let words = csvToArray(text);
 
-        const examples = [
-            words[0], words[1]
-        ];
-        console.log(words);
-        return words;
-    });
-    let currentwordIndex = 0;
-    let exampleIndex = 0;
+    //     const examples = [
+    //         words[0], words[1]
+    //     ];
+    //     console.log(words);
+    //     return words;
+    // });
+    // let currentwordIndex = 0;
+    // let exampleIndex = 0;
 
-    // assign headers to correct values and put both into array
-    function csvToArray(str, rowDelimiter = '\n', colDelimiter = ",") {
-        const rows = str.split(rowDelimiter); //splits rows
-        var arrayRows = [];
-        for (const row of rows) {
-            arrayRows.push(row); // Push each row into the array
-        }
-        const headers = arrayRows[0].split(colDelimiter); //splits headers
-        const arr = rows.slice(1).map(function(row) {  //takes only rows
-            const values = row.split(colDelimiter); //splits rows
-            const el = headers.reduce(function(object, header, index) { //iteratively goes through rows 
-                object[header] = values[index]; //assigns headers
-                return object;
-            }, {});
-            return el;
-        });
-        return arr;
-    }
+    // // assign headers to correct values and put both into array
+    // function csvToArray(str, rowDelimiter = '\n', colDelimiter = ",") {
+    //     const rows = str.split(rowDelimiter); //splits rows
+    //     var arrayRows = [];
+    //     for (const row of rows) {
+    //         arrayRows.push(row); // Push each row into the array
+    //     }
+    //     const headers = arrayRows[0].split(colDelimiter); //splits headers
+    //     const arr = rows.slice(1).map(function(row) {  //takes only rows
+    //         const values = row.split(colDelimiter); //splits rows
+    //         const el = headers.reduce(function(object, header, index) { //iteratively goes through rows 
+    //             object[header] = values[index]; //assigns headers
+    //             return object;
+    //         }, {});
+    //         return el;
+    //     });
+    //     return arr;
+    // }
 
 // ********************** START WORD AND NUMBER TASK BUTTONS & START TASK STUFF ****************** //
 

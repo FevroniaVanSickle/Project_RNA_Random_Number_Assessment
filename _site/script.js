@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log('hello world! iteration 4 :-)');
     const landingPage = document.getElementById('landing-page');
@@ -5,8 +6,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const nextLandingButton = document.getElementById('next-landing');
 
     // number test
-    const digitTestContainer = document.getElementById('digit-test-container');
-    const digitTestDescription = document.getElementById('digit-test-description');
+    const digitTestContainer1 = document.getElementById('digit-test-container-1');
+    const digitTestContainer2 = document.getElementById('digit-test-container-2');
+    const digitTestContainer3 = document.getElementById('digit-test-container-3');
+    const digitTestDescription1 = document.getElementById('digit-test-description-1');
+    const digitTestDescription2 = document.getElementById('digit-test-description-2');
+    const digitTestDescription3 = document.getElementById('digit-test-description-3');
+    const digitNextButton1= document.getElementById('digit-next-1');
+    const digitNextButton2 =document.getElementById('digit-next-2');
     const numberEntryContainer = document.getElementById('digit-entry-container');
     const startNumberTaskButton = document.getElementById('start-number-task');
     const digitInputField = document.getElementById('digit-input');
@@ -40,65 +47,32 @@ document.addEventListener('DOMContentLoaded', function() {
         'words': []
     };
 
-    let totalRounds = 10;
+    let totalRounds = 0;
     let taskType = 'number';
     let wordTaskStarted = false;
+    const totalNumEntries = 2;
 
     // Setup word test information
-    // const fs = require("fs");
-    // const csvFilePath = "./wordTask.csv";
+    // from michelle: IDEALLY these would be read from a separate file, but they've been hardcoded for now
+    const words = [
+        { cue: "Piece/mind/dating", answer: "game" },
+        { cue: "Hound/pressure/shot", answer: "Blood" },
+        { cue: "Dream/break/light", answer: "Day" }
+    ];
 
-    // // Create a read stream
-    // const readStream = fs.createReadStream(csvFilePath);
-
-    // let text = "";
-
-    // // Event handler for reading data from the stream
-    // readStream.on('data', (chunk) => {
-    //     // Append the chunk of data to the text
-    //     text += chunk;
-    // });
-
-    // let words = [];
-
-    // // Event handler for end of file
-    // readStream.on('end', () => {
-    //     let words = csvToArray(text);
-
-    //     const examples = [
-    //         words[0], words[1]
-    //     ];
-    //     console.log(words);
-    //     return words;
-    // });
-    // let currentwordIndex = 0;
-    // let exampleIndex = 0;
-
-    // // assign headers to correct values and put both into array
-    // function csvToArray(str, rowDelimiter = '\n', colDelimiter = ",") {
-    //     const rows = str.split(rowDelimiter); //splits rows
-    //     var arrayRows = [];
-    //     for (const row of rows) {
-    //         arrayRows.push(row); // Push each row into the array
-    //     }
-    //     const headers = arrayRows[0].split(colDelimiter); //splits headers
-    //     const arr = rows.slice(1).map(function(row) {  //takes only rows
-    //         const values = row.split(colDelimiter); //splits rows
-    //         const el = headers.reduce(function(object, header, index) { //iteratively goes through rows 
-    //             object[header] = values[index]; //assigns headers
-    //             return object;
-    //         }, {});
-    //         return el;
-    //     });
-    //     return arr;
-    // }
+    const examples = [
+        { cue: "carpet / alert / ink", answer: "red" },
+        { cue: "cane / daddy / plum", answer: "sugar" }
+      ];
+    let currentwordIndex = 0;
+    let exampleIndex = 0;
 
 // ********************** START WORD AND NUMBER TASK BUTTONS & START TASK STUFF ****************** //
 
     // Handle the 'Start Number Task' button click to begin the task
     startNumberTaskButton.addEventListener('click', function() {
         this.style.display = 'none';
-        digitTestDescription.style.display = 'none';
+        digitTestDescription3.style.display = 'none';
         numberEntryContainer.style.display = 'block';
         progressContainer.style.display = 'block';
         progressContainer.style.visibility = 'visible';
@@ -115,21 +89,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // all the word test stuff
         wordTestDescription.style.display = 'none';
-        wordForm.style.display = 'block';
+        wordForm.style.display = 'flex';
 
-        wordTestContainer.style.display = 'block';
+        wordTestContainer.style.display = 'flex';
         wordEntryContainer.style.visibility = 'visible';
 
-        wordInputField.style.display = 'block';
+        wordInputField.style.display = 'flex';
         wordInputField.style.visibility = 'visible';
 
-        submitButton.style.display = 'block';
+        submitButton.style.display = 'flex';
         submitButton.style.visibility = 'visible';
 
-        wordEntryContainer.style.display = 'block';
+        wordEntryContainer.style.display = 'flex';
         wordEntryContainer.style.visibility = 'visible';
 
-        prompt.style.display = 'block';
+        prompt.style.display = 'flex';
         prompt.style.visibility = 'visible';
 
         // reinstate progress bars
@@ -143,15 +117,35 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     nextLandingButton.addEventListener('click', function() {
-        landingPage.style.display = 'none';
-        digitTestDescription.style.display = 'block';
-        digitTestContainer.style.display = 'block';
-        userData.profilic_id = profilicIdInput.value; // Save the Prolific ID when the next button is clicked
+        if (!profilicIdInput.value){ // prevent user from continuing without ID
+            return;
+        }
+        else{
+            landingPage.style.display = 'none';
+            digitTestDescription1.style.display = 'block';
+            digitTestContainer1.style.display = 'block';
+            userData.profilic_id = profilicIdInput.value; // Save the Prolific ID when the next button is clicked
+        }
+        
+    });
+    
+    digitNextButton1.addEventListener('click', function() {
+        digitTestDescription1.style.display = 'none';
+        digitTestContainer1.style.display = 'none';
+        digitTestDescription2.style.display = 'block';
+        digitTestContainer2.style.display = 'block';
+    });
+
+    digitNextButton2.addEventListener('click', function() {
+        digitTestDescription2.style.display = 'none';
+        digitTestContainer2.style.display = 'none';
+        digitTestDescription3.style.display = 'block';
+        digitTestContainer3.style.display = 'block';
     });
 
     examplesButton.addEventListener('click', function() {
         console.log('onto the practice runs!');
-        wordForm.style.display = 'block';
+        wordForm.style.display = 'inline';
         wordTestDescription.style.display = 'none';
         this.style.display = 'none';
         setupTask('word');
@@ -163,18 +157,18 @@ document.addEventListener('DOMContentLoaded', function() {
         clearTimeout(timeoutId);
         console.log("Starting setupTask with type:", type);
         roundCount = 0;
-        totalRounds = type === 'number' ? 10 : words.length; //check this line if there are problems 
+        totalRounds = type === 'number' ? totalNumEntries : words.length; //check this line if there are problems 
         updateTaskProgressBar();
         if (type === 'number') {
             prompt.textContent = 'Enter a digit (1-9):';
-            digitInputField.style.display = 'block';
+            digitInputField.style.display = 'flex';
             wordInputField.style.display = 'none';
         } else {
             prompt.textContent = 'Enter the word that best goes with the following: ';
             prompt.textContent += words[currentwordIndex].cue;            
-            wordForm.style.display = 'block';
+            wordForm.style.display = 'flex'; //block
             digitInputField.style.display = 'none';
-            wordInputField.style.display = 'block';
+            wordInputField.style.display = 'flex'; //block
         }
     }
 
@@ -319,6 +313,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 prompt.innerHTML = '<span style="color: lightcoral;">Number must be 1-9</span>';
             }
         } else if (taskType === 'word') {
+            input = input.toLowerCase;
             if (input === correctAnswer) {
                 wordInputField.style.backgroundColor = 'lightgreen';
                 wordInputField.style.borderColor = 'green';
@@ -419,14 +414,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function transitionToWordTask() {
 
         console.log("Transitioning to Word Task");
-        digitTestContainer.style.display = 'none';
+        digitTestContainer3.style.display = 'none';
         startWordTaskButton.style.display = 'none';
         submitButton.style.display = 'none';
 
         progressContainer.style.visibility = 'hidden';
-        wordForm.style.display = 'block';
-        wordEntryContainer.style.display = 'block';
-        examplesButton.style.display = 'block'; // show button for examples
+        wordForm.style.display = 'flex';
+        wordEntryContainer.style.display = 'flex';
+        examplesButton.style.display = 'flex'; // show button for examples
         
     }
 
@@ -482,11 +477,11 @@ document.addEventListener('DOMContentLoaded', function() {
    
    function handleExampleRounds() {
         console.log('example round...');
-        wordForm.style.display = 'block';
-        wordEntryContainer.style.display = 'block';
+        wordForm.style.display = 'flex';
+        wordEntryContainer.style.display = 'flex';
 
         wordInputField.style.visibility = 'visible';
-        submitButton.style.display = 'block';
+        submitButton.style.display = 'flex';
         submitButton.style.visibility = 'visible';
 
         console.log('showing first sample cue');

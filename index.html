@@ -12,7 +12,7 @@
         <div id="landing-page">
             <h1>Welcome!</h1>
             <label for="prolific-id-input">Enter your Prolific ID:</label>
-            <input type="text" id="prolific-id-input" placeholder="Enter your Prolific ID here">
+            <input type="text" id="prolific-id-input" placeholder="Enter your ID here">
             <button id="next-landing">Next</button>
         </div>
 
@@ -20,9 +20,9 @@
         <!-- Prompt for all tests -->
         <p id="prompt" style="font-size: 16px; color: #333;"></p>
 
-        <!-- Digit Entry Test Container -->
-        <div id="digit-test-container" style="display: none;">
-            <p id="digit-test-description">
+        <!-- Digit Entry Test Containers -->
+        <div id="digit-test-container-1" style="display: none;">
+            <p id="digit-test-description-1">
                 For the next two minutes, you will be asked to complete a task in which you will
                 enter a random number (between 1 and 9) at every one-second interval. You should try
                 to be as random as possible. Picking random numbers can be thought of in terms of
@@ -30,12 +30,23 @@
                 picking another number out of the hat. Doing this may sometimes, although not
                 typically, result in the same number occurring two or more times in a row
                 (e.g., 2, 2, 2). For this task you will be asked to enter a series of random numbers
-                from 1 to 9. Once you press START TASK, you will hear a soft beep (turn volume up)
+                from 1 to 9. 
+            </p>
+            <button id="digit-next-1">Next</button>
+        </div>
+        <div id="digit-test-container-2" style="display: none;">
+            <p id="digit-test-description-2">
+                Once you press START TASK, you will hear a soft beep (turn volume up)
                 and you will have a box to enter a number from 1 to 9. As soon as you enter one number,
                 another beep will sound and a new box will appear. You will keep doing this task for a
                 couple of minutes. Try and be as random as possible with your number entries.
-                You will have just one second to enter each number, so have your fingers on the number
-                keys and be ready to go before you press start! If you fail to enter a number within
+            </p>
+            <button id="digit-next-2">Next</button>
+        </div>
+        <div id="digit-test-container-3" style="display: none;">
+            <p id="digit-test-description-3">   
+                You will have just one second to enter each number, so <span class="bolder">have your fingers on the number
+                keys and be ready to go before you press start!</span> If you fail to enter a number within
                 1 second, you will receive a warning, “too slow!” If this happens, just continue to
                 do your best to enter numbers each second. The green bar at the bottom will indicate
                 how much longer you have left in the task.

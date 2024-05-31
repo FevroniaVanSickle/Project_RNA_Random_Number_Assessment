@@ -12,14 +12,21 @@
         <div id="landing-page">
             <h1>Welcome!</h1>
             <label for="prolific-id-input">Enter your Prolific ID:</label>
-            <input type="text" id="prolific-id-input" placeholder="Enter your ID here">
+            <input type="text" id="prolific-id-input" style="font-size: 20px" placeholder="Enter your ID here">
             <button id="next-landing">Next</button>
         </div>
 
         <div id="main-container">
         <!-- Prompt for all tests -->
-        <p id="prompt" style="font-size: 16px; color: #333;"></p>
+        <p id="prompt" style="font-size: 20px; color: #333;"></p>
 
+         <!-- Task Countdown Container -->
+         <div id="task-countdown-container" style="display: none;">
+            <p id="count-number-three" style= 'display: none;'>3</p>
+            <p id="count-number-two" style= 'display: none;'>2</p>
+            <p id="count-number-one" style= 'display: none;'>1</p>
+        </div>
+        
         <!-- Digit Entry Test Containers -->
         <div id="digit-test-container-1" style="display: none;">
             <p id="digit-test-description-1">
@@ -53,12 +60,12 @@
             </p>
             <button id="start-number-task">Start Number Task</button>
             <div id="digit-entry-container" style="display: none;">
-                <input type="text" id="digit-input" maxlength="1">
+                <input type="text" id="digit-input" style="font-size: 20px" maxlength="1">
             </div>
         </div>
 
         <!-- word-based Test Container -->
-        <form id="word-form" style="display: none;">
+        <form id="word-form" style="display: none;font-size: 20px;">
             <div id="word-test-container">
                 <p id="word-test-description">
                     For this next task, you will be presented with 3 cue words.” Your task is to
@@ -68,7 +75,7 @@
                 <button id="start-word-task">Start Word Task</button>  
                 <button id="examples-button">Try an example...</button> 
                 <div id="word-entry-container" style="display: none;">
-                    <input type="text" id="word-input">
+                    <input type="text" style="font-size: 20px" id="word-input">
                     <button type="button" id="submit-word">Submit</button>
                 </div>
                 </div>

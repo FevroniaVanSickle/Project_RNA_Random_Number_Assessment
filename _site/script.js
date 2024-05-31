@@ -1,6 +1,6 @@
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('hello world! iteration 4 :-)');
+    console.log('hello world! :-)');
     const landingPage = document.getElementById('landing-page');
     const profilicIdInput = document.getElementById('prolific-id-input');
     const nextLandingButton = document.getElementById('next-landing');
@@ -34,9 +34,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressLabel = document.getElementById('progress-label');
     const roundProgress = document.getElementById('round-progress');
 
+    // task countdown
+    const taskCountdownContainer = document.getElementById('task-countdown-container');
+
     // prompt
     const prompt = document.getElementById('prompt');
-
 
     let timeoutId;
     let roundCount = 0;
@@ -55,9 +57,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup word test information
     // from michelle: IDEALLY these would be read from a separate file, but they've been hardcoded for now
     const words = [
-        { cue: "Piece/mind/dating", answer: "game" },
-        { cue: "Hound/pressure/shot", answer: "Blood" },
-        { cue: "Dream/break/light", answer: "Day" }
+        { cue: "piece/mind/dating", answer: "game" },
+        { cue: "hound/pressure/shot", answer: "blood" },
+        { cue: "dream/break/light", answer: "day" }
     ];
 
     const examples = [
@@ -73,47 +75,58 @@ document.addEventListener('DOMContentLoaded', function() {
     startNumberTaskButton.addEventListener('click', function() {
         this.style.display = 'none';
         digitTestDescription3.style.display = 'none';
-        numberEntryContainer.style.display = 'block';
-        progressContainer.style.display = 'block';
-        progressContainer.style.visibility = 'visible';
-        console.log('displaying progress bar');
-        setupTask('number');
-        playRound();
+        setCountdown('number').then(() => {
+            numberEntryContainer.style.display = 'block';
+            progressContainer.style.display = 'block';
+            progressContainer.style.visibility = 'visible';
+            console.log('displaying progress bar');
+            setupTask('number');
+            playRound();
+        }).catch(error => {
+            console.error('Error in setCountdown for number:', error);
+        });
     });
 
-    // Newly added 'Start Word Task' button event listener
+    // 'Start Word Task' button event listener
     startWordTaskButton.addEventListener('click', function() {
-        console.log('starting word task');
+       
+        // clear the page
         this.style.display = 'none';
-        wordTaskStarted = true;
-
-        // all the word test stuff
-        wordTestDescription.style.display = 'none';
-        wordForm.style.display = 'flex';
-
-        wordTestContainer.style.display = 'flex';
-        wordEntryContainer.style.visibility = 'visible';
-
-        wordInputField.style.display = 'flex';
-        wordInputField.style.visibility = 'visible';
-
-        submitButton.style.display = 'flex';
-        submitButton.style.visibility = 'visible';
-
-        wordEntryContainer.style.display = 'flex';
-        wordEntryContainer.style.visibility = 'visible';
-
-        prompt.style.display = 'flex';
-        prompt.style.visibility = 'visible';
-
-        // reinstate progress bars
         digitInputField.style.display = 'none';
-        progressContainer.style.visibility = 'visible';
-        console.log('displaying progress bar');
+        wordTestDescription.style.display = 'none';
 
+        // countdown 
+        setCountdown('word').then(() => {
+            console.log('starting word task');
+            wordTaskStarted = true;
 
-        setupTask('word');
-        playRound();
+            // all the word test stuff
+            wordForm.style.display = 'flex';
+
+            wordTestContainer.style.display = 'flex';
+            wordEntryContainer.style.visibility = 'visible';
+
+            wordInputField.style.display = 'flex';
+            wordInputField.style.visibility = 'visible';
+
+            submitButton.style.display = 'flex';
+            submitButton.style.visibility = 'visible';
+
+            wordEntryContainer.style.display = 'flex';
+            wordEntryContainer.style.visibility = 'visible';
+
+            prompt.style.display = 'flex';
+            prompt.style.visibility = 'visible';
+
+            // reinstate progress bars
+            progressContainer.style.visibility = 'visible';
+            console.log('displaying progress bar');
+            setupTask('word');
+            playRound();
+        }).catch(error => {
+            console.error('Error in setCountdown for example:', error);
+        });;
+        
     });
     
     nextLandingButton.addEventListener('click', function() {
@@ -145,15 +158,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     examplesButton.addEventListener('click', function() {
         console.log('onto the practice runs!');
-        wordForm.style.display = 'inline';
+        wordForm.style.display = 'block';
         wordTestDescription.style.display = 'none';
-        this.style.display = 'none';
-        setupTask('word');
-        handleExampleRounds();
+        this.style.display = 'none'; 
+        // ensuring the form does not reload
+        if (wordForm) {
+            wordForm.onsubmit = function(event) {
+                event.preventDefault();
+            };
+        }
+        setCountdown('example').then(() => {
+            setupTask('word');
+            handleExampleRounds();
+        }).catch(error => {
+            console.error('Error in setCountdown for example:', error);
+        });;
     });
 
     function setupTask(type) {
-
         clearTimeout(timeoutId);
         console.log("Starting setupTask with type:", type);
         roundCount = 0;
@@ -166,9 +188,9 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             prompt.textContent = 'Enter the word that best goes with the following: ';
             prompt.textContent += words[currentwordIndex].cue;            
-            wordForm.style.display = 'flex'; //block
+            wordForm.style.display = 'block'; //block
             digitInputField.style.display = 'none';
-            wordInputField.style.display = 'flex'; //block
+            wordInputField.style.display = 'block'; //block
         }
     }
 
@@ -189,6 +211,64 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // TASK / ROUND FUNCTIONS
 
+    // Countdown to Begin Tasks
+    async function setCountdown(type){
+        console.log('Initiating Countdown');
+        taskCountdownContainer.style.display = 'block';
+        const childNum = Array.from(taskCountdownContainer.children);
+        return new Promise((resolve, reject) => {
+            showNextChild(childNum, 0)
+                .then(() => {
+                    if (type === 'number') {
+                        console.log('finished countdown for numbers task');
+                        resolve(); // Resolve after countdown completion for 'number'
+                    } else if (type === 'example') {
+                        console.log('finished countdown for example task');
+                        resolve(); // Resolve after countdown completion for 'example'
+                    } else if (type === 'word') {
+                        console.log('finished countdown for word task');
+                        resolve(); // Resolve after countdown completion for 'word'
+                    } else {
+                        reject(new Error('Invalid task type'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error during countdown:', error);
+                    reject(error);
+                });
+        });
+    };
+
+    // Recursively Display Numbers in Countdown 
+    function showNextChild(childNum, index) {
+        console.log('showNextChild');
+        return new Promise((resolve, reject) => {
+            if (index < childNum.length) {
+                const child = childNum[index];
+
+                // Ensure the child element exists
+                if (!child) {
+                    console.error('Child element does not exist:', index);
+                    reject(new Error('Child element does not exist'));
+                    return;
+                }
+                child.style.display = 'block';
+                try {
+                    setTimeout(function(){
+                        child.style.display = 'none';
+                        showNextChild(childNum, index + 1).then(resolve).catch(reject); // Show the next child after the current one is hidden 
+                    }, 1000); // hold each number for one second 
+                } catch (error) {
+                    reject(error);
+                }
+            } else {
+                console.log('Countdown complete');
+                taskCountdownContainer.style.display = 'none';
+                resolve();
+            }
+        });
+    }
+
     function updateTaskProgressBar() {
         taskProgress.style.width = `${(roundCount / totalRounds) * 100}%`;
         progressLabel.textContent = "Task Progress";
@@ -202,7 +282,6 @@ document.addEventListener('DOMContentLoaded', function() {
             roundProgress.style.width = '0%';
         }, 10);
     }
-
 
     function playBeep() {
         const audioContext = new AudioContext();
@@ -247,8 +326,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             endSession();
         }
-
-
     }
 
     function handleTimeout() {
@@ -272,6 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(playRound, 1000);
         }
     } 
+
 
     // handles input field for number tasks
     digitInputField.addEventListener('input', function(e) {
@@ -412,12 +490,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function transitionToWordTask() {
-
         console.log("Transitioning to Word Task");
         digitTestContainer3.style.display = 'none';
         startWordTaskButton.style.display = 'none';
         submitButton.style.display = 'none';
-
         progressContainer.style.visibility = 'hidden';
         wordForm.style.display = 'flex';
         wordEntryContainer.style.display = 'flex';
@@ -487,8 +563,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('showing first sample cue');
         prompt.textContent = examples[exampleIndex].cue; // show first example cue
         prompt.style.visibility = 'visible';
-
-
         examplesButton.style.display = 'none'; 
 
         // ensuring the form does not submit traditionally

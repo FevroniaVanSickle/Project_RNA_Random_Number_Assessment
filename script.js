@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let timeoutId;
     let roundCount = 0;
 
+    profilicIdInput.focus();
     let userData = {
         'profilic_id': '', // replace 'user_profilic_id' with the actual profilic ID of the user
         'numbers': [],
@@ -66,6 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
         { cue: "carpet / alert / ink", answer: "red" },
         { cue: "cane / daddy / plum", answer: "sugar" }
       ];
+
     let currentwordIndex = 0;
     let exampleIndex = 0;
 
@@ -79,7 +81,6 @@ document.addEventListener('DOMContentLoaded', function() {
             numberEntryContainer.style.display = 'block';
             progressContainer.style.display = 'block';
             progressContainer.style.visibility = 'visible';
-            console.log('displaying progress bar');
             setupTask('number');
             playRound();
         }).catch(error => {
@@ -92,12 +93,10 @@ document.addEventListener('DOMContentLoaded', function() {
        
         // clear the page
         this.style.display = 'none';
-        digitInputField.style.display = 'none';
-        wordTestDescription.style.display = 'none';
+        progressContainer.style.visibility = 'hidden';
 
         // countdown 
         setCountdown('word').then(() => {
-            console.log('starting word task');
             wordTaskStarted = true;
 
             // all the word test stuff
@@ -108,6 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             wordInputField.style.display = 'flex';
             wordInputField.style.visibility = 'visible';
+            wordInputField.focus();
 
             submitButton.style.display = 'flex';
             submitButton.style.visibility = 'visible';
@@ -119,12 +119,12 @@ document.addEventListener('DOMContentLoaded', function() {
             prompt.style.visibility = 'visible';
 
             // reinstate progress bars
+            progressContainer.style.display = 'block';
             progressContainer.style.visibility = 'visible';
-            console.log('displaying progress bar');
             setupTask('word');
             playRound();
         }).catch(error => {
-            console.error('Error in setCountdown for example:', error);
+            console.error('Error in setCountdown for word:', error);
         });;
         
     });
@@ -138,6 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
             digitTestDescription1.style.display = 'block';
             digitTestContainer1.style.display = 'block';
             userData.profilic_id = profilicIdInput.value; // Save the Prolific ID when the next button is clicked
+            // digitTestContainer3.style.display = 'block';
         }
         
     });
@@ -157,10 +158,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     examplesButton.addEventListener('click', function() {
-        console.log('onto the practice runs!');
         wordForm.style.display = 'block';
+        progressContainer.style.display = 'none';
         wordTestDescription.style.display = 'none';
         this.style.display = 'none'; 
+        examplesTaskStarted = false;
         // ensuring the form does not reload
         if (wordForm) {
             wordForm.onsubmit = function(event) {
@@ -168,8 +170,11 @@ document.addEventListener('DOMContentLoaded', function() {
             };
         }
         setCountdown('example').then(() => {
-            setupTask('word');
-            handleExampleRounds();
+            progressContainer.style.display = 'block';
+            progressContainer.style.visibility = 'visible';
+            examplesButton.style.display = 'none'; 
+            setupTask('examples');
+            startExampleRounds();
         }).catch(error => {
             console.error('Error in setCountdown for example:', error);
         });;
@@ -177,56 +182,65 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function setupTask(type) {
         clearTimeout(timeoutId);
-        console.log("Starting setupTask with type:", type);
         roundCount = 0;
-        totalRounds = type === 'number' ? totalNumEntries : words.length; //check this line if there are problems 
+        //set totalRounds according to type
+        if (type === 'examples'){
+            totalRounds = examples.length;
+            console.log('total rounds = '+ totalRounds);
+        }else{
+            totalRounds = type === 'number' ? totalNumEntries : words.length;
+        }
         updateTaskProgressBar();
         if (type === 'number') {
             prompt.textContent = 'Enter a digit (1-9):';
             digitInputField.style.display = 'flex';
             wordInputField.style.display = 'none';
-        } else {
+        } else if (type == 'word'){
             prompt.textContent = 'Enter the word that best goes with the following: ';
             prompt.textContent += words[currentwordIndex].cue;            
-            wordForm.style.display = 'block'; //block
+            wordForm.style.display = 'block'; 
             digitInputField.style.display = 'none';
-            wordInputField.style.display = 'block'; //block
+            wordInputField.style.display = 'block'; 
+            wordInputField.focus();
+        } else if (type == 'examples') {
+            prompt.textContent = 'Enter the word that best goes with the following: ';
+            prompt.textContent += examples[currentwordIndex].cue;            
+            wordForm.style.display = 'block'; 
+            digitInputField.style.display = 'none';
+            wordInputField.style.display = 'block'; 
+            wordInputField.focus();
         }
+        
     }
 
     function manageProgressBar(pause) {
-        console.log('Freezing and resetting progress bar...');
+        console.log('freeze/reset round ProgressBar');
         // Immediately stop any ongoing transition to freeze the current state
         roundProgress.style.transition = 'none';
         roundProgress.style.width = '100%';  // Assuming you want to freeze it fully filled
     
         // Set a timeout to reset the progress bar after the specified pause
         setTimeout(() => {
-            console.log('Resetting progress bar...');
+            // console.log('Resetting round progress bar');
             roundProgress.style.transition = 'none';
             roundProgress.style.width = '100%';  // Resets the bar to full width
         }, pause);
     }
     
-
     // TASK / ROUND FUNCTIONS
 
     // Countdown to Begin Tasks
     async function setCountdown(type){
-        console.log('Initiating Countdown');
         taskCountdownContainer.style.display = 'block';
         const childNum = Array.from(taskCountdownContainer.children);
         return new Promise((resolve, reject) => {
             showNextChild(childNum, 0)
                 .then(() => {
                     if (type === 'number') {
-                        console.log('finished countdown for numbers task');
                         resolve(); // Resolve after countdown completion for 'number'
                     } else if (type === 'example') {
-                        console.log('finished countdown for example task');
                         resolve(); // Resolve after countdown completion for 'example'
                     } else if (type === 'word') {
-                        console.log('finished countdown for word task');
                         resolve(); // Resolve after countdown completion for 'word'
                     } else {
                         reject(new Error('Invalid task type'));
@@ -241,7 +255,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Recursively Display Numbers in Countdown 
     function showNextChild(childNum, index) {
-        console.log('showNextChild');
         return new Promise((resolve, reject) => {
             if (index < childNum.length) {
                 const child = childNum[index];
@@ -262,7 +275,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     reject(error);
                 }
             } else {
-                console.log('Countdown complete');
                 taskCountdownContainer.style.display = 'none';
                 resolve();
             }
@@ -270,13 +282,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateTaskProgressBar() {
-        taskProgress.style.width = `${(roundCount / totalRounds) * 100}%`;
+        taskProg = `${(roundCount / totalRounds) * 100}%`;
+        taskProgress.style.width = taskProg;
+        console.log('task progress = '+ taskProg);
+        console.log('roundCount = ' + roundCount);
+        console.log('length = ' + examples.length);
         progressLabel.textContent = "Task Progress";
         progressLabel.style.color = 'green';
+        console.log('updated task progress bar');
     }
 
     function updateRoundProgressBar(duration) {
-        console.log('starting round countdown');
         setTimeout(() => {
             roundProgress.style.transition = `width ${duration / 1000}s linear`;
             roundProgress.style.width = '0%';
@@ -300,23 +316,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (taskType === 'word' && wordTaskStarted === false) return;
 
-        console.log('starting round!');
-
         if (taskType === 'number') {
-            console.log("starting number round...");
             digitInputField.style.backgroundColor = 'white'; // Reset background color
             digitInputField.value = ''; // Clear previous input
+            digitInputField.focus();
         }
 
         else {
-            wordInputField.style.backgroundColor = 'white';
+            // wordInputField.style.backgroundColor = 'white';
             wordInputField.value = ''; // Clear previous input
+            wordInputField.focus();
         }
 
         prompt.textContent = taskType === 'number' ? 'Enter a digit (1-9):' : 'Enter the word that best goes with the following: ';
 
         if (taskType === 'word'){
-            console.log("starting word round...");
             prompt.textContent += words[currentwordIndex].cue;
         }
         
@@ -329,6 +343,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function handleTimeout() {
+        console.log(handleTimeout);
         if (taskType === 'word' && wordTaskStarted === false) return;
 
         if (roundCount >= totalRounds) {
@@ -345,11 +360,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 userData.words.push('');
                 roundCount++;
             }
+            else {
+                wordInputField.style.backgroundColor = 'lightcoral';
+                roundCount++;
+            }
 
             setTimeout(playRound, 1000);
         }
     } 
-
 
     // handles input field for number tasks
     digitInputField.addEventListener('input', function(e) {
@@ -391,11 +409,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 prompt.innerHTML = '<span style="color: lightcoral;">Number must be 1-9</span>';
             }
         } else if (taskType === 'word') {
-            input = input.toLowerCase;
-            if (input === correctAnswer) {
+            if (input.toLowerCase() === correctAnswer.toLowerCase()) {
                 wordInputField.style.backgroundColor = 'lightgreen';
                 wordInputField.style.borderColor = 'green';
-                prompt.innerHTML = `Correct! The answer was <span style="color: green;">${correctAnswer}</span>`;
+                prompt.innerHTML = `Correct! The answer was  <span style="color: green;">${correctAnswer}</span>`;
                 roundCount++;
                 userData.words.push(input); // save the word input by the user
                 manageProgressBar(1000);
@@ -404,7 +421,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 wordInputField.style.backgroundColor = 'lightcoral';
                 wordInputField.style.borderColor = 'lightcoral';
-                prompt.innerHTML = `Incorrect, the answer was <span style="color: lightcoral;">${correctAnswer}</span>`;
+                prompt.innerHTML = `Incorrect, the answer was  <span style="color: lightcoral;">${correctAnswer}</span>`;
                 roundCount++;
                 userData.words.push(input);
                 manageProgressBar(1000);
@@ -446,7 +463,6 @@ document.addEventListener('DOMContentLoaded', function() {
         link.click();
         document.body.removeChild(link);
     }
-    
 
     function endSession() {
         clearTimeout(timeoutId);
@@ -490,7 +506,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function transitionToWordTask() {
-        console.log("Transitioning to Word Task");
         digitTestContainer3.style.display = 'none';
         startWordTaskButton.style.display = 'none';
         submitButton.style.display = 'none';
@@ -551,75 +566,88 @@ document.addEventListener('DOMContentLoaded', function() {
     
    // *****************  EXAMPLE METHODS *********************************** //
    
-   function handleExampleRounds() {
-        console.log('example round...');
-        wordForm.style.display = 'flex';
-        wordEntryContainer.style.display = 'flex';
+   function startExampleRounds() {
 
-        wordInputField.style.visibility = 'visible';
+    console.log('startExampleRounds');
+
+        //update round progress bar
+        if (roundCount < totalRounds) {
+            updateRoundProgressBar(taskType === 'number' ? 1000 : 15000);
+            timeoutId = setTimeout(handleTimeout, taskType === 'number' ? 1010 : 15010); // Ensure round times out if no input
+        }
+
         submitButton.style.display = 'flex';
         submitButton.style.visibility = 'visible';
 
-        console.log('showing first sample cue');
-        prompt.textContent = examples[exampleIndex].cue; // show first example cue
-        prompt.style.visibility = 'visible';
-        examplesButton.style.display = 'none'; 
-
-        // ensuring the form does not submit traditionally
-        if (wordForm) {
-            wordForm.onsubmit = function(event) {
-                event.preventDefault();
-            };
-        }
-
         submitButton.onclick = function(event) {
-            event.preventDefault(); // prevent the default form submission when the submit button is clicked
-            if (wordTaskStarted === false) {
-                processExampleInput();
-            } else {
-                handleWordInput();
-            }
+            event.preventDefault(); // prevent the default form submission on enter key press
+            console.log('submit button clicked');
+            roundCount++;
+            updateTaskProgressBar();   
+            manageProgressBar(1000);     
+            playBeep();
+            processExampleInput();
+
         };
 
-        wordInputField.onkeypress = function(event) {
+        //this for some reason goes to playRound() while submitButton.onclick does not
+        wordInputField.onkeypress = function(event) { 
             if (event.key === 'Enter') {
                 event.preventDefault(); // prevent the default form submission on enter key press
-                if (wordTaskStarted === false) {
-                    processExampleInput();
-                } else {
-                    handleWordInput();
-                }
+                console.log('key pressed!');
+                updateTaskProgressBar();   
+                manageProgressBar(1000);     
+                processExampleInput();
+               
             }
     };
+
 }
 
 function processExampleInput() {
-
     console.log('processing example input...');
+
     const input = wordInputField.value.trim();
     let correctAnswer = examples[exampleIndex].answer;
     
     if (input.toLowerCase() === correctAnswer.toLowerCase()) {
         wordInputField.style.backgroundColor = 'lightgreen';
+        wordInputField.style.borderColor = 'green';
         prompt.innerHTML = `Correct, the answer was <span style="color: green;">${correctAnswer}</span>`;
+        updateTaskProgressBar();  
+        manageProgressBar(1000);
+        clearTimeout(timeoutId);
     } else {
         wordInputField.style.backgroundColor = 'lightcoral';
+        wordInputField.style.borderColor = 'lightcoral';
         prompt.innerHTML = `Incorrect, the answer was <span style="color: lightcoral;">${correctAnswer}</span>`;
+        updateTaskProgressBar();  
+        manageProgressBar(1000);
+        clearTimeout(timeoutId); // stop countdown
     }
     setTimeout(() => {
         if (++exampleIndex < examples.length) {
             // move to the next example
-            prompt.textContent = examples[exampleIndex].cue;
+            prompt.textContent = 'Enter the word that best goes with the following: ';
+            prompt.textContent += examples[exampleIndex].cue;
             correctAnswer = examples[exampleIndex].answer;
             wordInputField.value = '';
             wordInputField.style.backgroundColor = 'white';
+            if (roundCount < totalRounds) {
+                updateRoundProgressBar(taskType === 'number' ? 1000 : 15000);
+                timeoutId = setTimeout(handleTimeout, taskType === 'number' ? 1010 : 15010); // Ensure round times out if no input
+            }
+                
         } else {
             // all examples are done, show start word task button
             wordInputField.style.visibility = 'hidden';
+            wordInputField.value = '';
+            wordInputField.style.backgroundColor = 'white';
             submitButton.style.visibility = 'hidden';
             startWordTaskButton.style.display = 'block'; // now show start button to begin the actual task
             prompt.style.visibility = 'hidden';
         }
-    }, 3000); // display correct answer for 3 seconds
+    }, 2000); // display correct answer for 3 seconds
 }
 })
+

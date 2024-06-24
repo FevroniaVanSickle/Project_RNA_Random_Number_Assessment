@@ -65,8 +65,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const examples = [
         { cue: "carpet / alert / ink", answer: "red" },
-        { cue: "cane / daddy / plum", answer: "sugar" }
+        { cue: "cane / daddy / plum", answer: "sugar" },
+        { cue: "dream/break/light", answer: "day" }
       ];
+
     let currentwordIndex = 0;
     let exampleIndex = 0;
 
@@ -80,7 +82,6 @@ document.addEventListener('DOMContentLoaded', function() {
             numberEntryContainer.style.display = 'block';
             progressContainer.style.display = 'block';
             progressContainer.style.visibility = 'visible';
-            console.log('displaying progress bar');
             setupTask('number');
             playRound();
         }).catch(error => {
@@ -93,10 +94,10 @@ document.addEventListener('DOMContentLoaded', function() {
        
         // clear the page
         this.style.display = 'none';
+        progressContainer.style.visibility = 'hidden';
 
         // countdown 
         setCountdown('word').then(() => {
-            console.log('starting word task');
             wordTaskStarted = true;
 
             // all the word test stuff
@@ -121,7 +122,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // reinstate progress bars
             progressContainer.style.display = 'block';
             progressContainer.style.visibility = 'visible';
-            console.log('displaying progress bar');
             setupTask('word');
             playRound();
         }).catch(error => {
@@ -139,6 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
             digitTestDescription1.style.display = 'block';
             digitTestContainer1.style.display = 'block';
             userData.profilic_id = profilicIdInput.value; // Save the Prolific ID when the next button is clicked
+            // digitTestContainer3.style.display = 'block';
         }
         
     });
@@ -158,7 +159,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     examplesButton.addEventListener('click', function() {
-        console.log('onto the practice runs!');
         wordForm.style.display = 'block';
         progressContainer.style.display = 'none';
         wordTestDescription.style.display = 'none';
@@ -174,7 +174,6 @@ document.addEventListener('DOMContentLoaded', function() {
             progressContainer.style.display = 'block';
             progressContainer.style.visibility = 'visible';
             examplesButton.style.display = 'none'; 
-            console.log('displaying progress bar'); 
             setupTask('examples');
             startExampleRounds();
         }).catch(error => {
@@ -184,11 +183,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function setupTask(type) {
         clearTimeout(timeoutId);
-        console.log("Starting setupTask with type:", type);
         roundCount = 0;
         //set totalRounds according to type
         if (type === 'example'){
-            totalRounds = examples.length();
+            totalRounds = examples.length;
+            console.log('total rounds = '+ totalRounds);
         }else{
             totalRounds = type === 'number' ? totalNumEntries : words.length;
         }
@@ -216,38 +215,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function manageProgressBar(pause) {
-        console.log('Freezing and resetting progress bar...');
+        console.log('freeze/reset round ProgressBar');
         // Immediately stop any ongoing transition to freeze the current state
         roundProgress.style.transition = 'none';
         roundProgress.style.width = '100%';  // Assuming you want to freeze it fully filled
     
         // Set a timeout to reset the progress bar after the specified pause
         setTimeout(() => {
-            console.log('Resetting progress bar...');
+            // console.log('Resetting round progress bar');
             roundProgress.style.transition = 'none';
             roundProgress.style.width = '100%';  // Resets the bar to full width
         }, pause);
     }
     
-
     // TASK / ROUND FUNCTIONS
 
     // Countdown to Begin Tasks
     async function setCountdown(type){
-        console.log('Initiating Countdown');
         taskCountdownContainer.style.display = 'block';
         const childNum = Array.from(taskCountdownContainer.children);
         return new Promise((resolve, reject) => {
             showNextChild(childNum, 0)
                 .then(() => {
                     if (type === 'number') {
-                        console.log('finished countdown for numbers task');
                         resolve(); // Resolve after countdown completion for 'number'
                     } else if (type === 'example') {
-                        console.log('finished countdown for example task');
                         resolve(); // Resolve after countdown completion for 'example'
                     } else if (type === 'word') {
-                        console.log('finished countdown for word task');
                         resolve(); // Resolve after countdown completion for 'word'
                     } else {
                         reject(new Error('Invalid task type'));
@@ -262,7 +256,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Recursively Display Numbers in Countdown 
     function showNextChild(childNum, index) {
-        console.log('showNextChild');
         return new Promise((resolve, reject) => {
             if (index < childNum.length) {
                 const child = childNum[index];
@@ -283,7 +276,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     reject(error);
                 }
             } else {
-                console.log('Countdown complete');
                 taskCountdownContainer.style.display = 'none';
                 resolve();
             }
@@ -291,14 +283,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateTaskProgressBar() {
-        taskProgress.style.width = `${(roundCount / totalRounds) * 100}%`;
+        taskProg = `${(roundCount / totalRounds) * 100}%`;
+        taskProgress.style.width = taskProg;
+        console.log('task progress = '+ taskProg);
         progressLabel.textContent = "Task Progress";
         progressLabel.style.color = 'green';
         console.log('updated task progress bar');
     }
 
     function updateRoundProgressBar(duration) {
-        console.log('starting round countdown');
         setTimeout(() => {
             roundProgress.style.transition = `width ${duration / 1000}s linear`;
             roundProgress.style.width = '0%';
@@ -322,10 +315,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (taskType === 'word' && wordTaskStarted === false) return;
 
-        console.log('starting round!');
-
         if (taskType === 'number') {
-            console.log("starting number round...");
             digitInputField.style.backgroundColor = 'white'; // Reset background color
             digitInputField.value = ''; // Clear previous input
             digitInputField.focus();
@@ -340,7 +330,6 @@ document.addEventListener('DOMContentLoaded', function() {
         prompt.textContent = taskType === 'number' ? 'Enter a digit (1-9):' : 'Enter the word that best goes with the following: ';
 
         if (taskType === 'word'){
-            console.log("starting word round...");
             prompt.textContent += words[currentwordIndex].cue;
         }
         
@@ -353,6 +342,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function handleTimeout() {
+        console.log(handleTimeout);
         if (taskType === 'word' && wordTaskStarted === false) return;
 
         if (roundCount >= totalRounds) {
@@ -369,11 +359,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 userData.words.push('');
                 roundCount++;
             }
+            else {
+                wordInputField.style.backgroundColor = 'lightcoral';
+                roundCount++;
+            }
 
             setTimeout(playRound, 1000);
         }
     } 
-
 
     // handles input field for number tasks
     digitInputField.addEventListener('input', function(e) {
@@ -513,7 +506,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function transitionToWordTask() {
-        console.log("Transitioning to Word Task");
         digitTestContainer3.style.display = 'none';
         startWordTaskButton.style.display = 'none';
         submitButton.style.display = 'none';
@@ -576,39 +568,34 @@ document.addEventListener('DOMContentLoaded', function() {
    
    function startExampleRounds() {
 
+    console.log('startExampleRounds');
+
         //update round progress bar
         if (roundCount < totalRounds) {
             updateRoundProgressBar(taskType === 'number' ? 1000 : 15000);
             timeoutId = setTimeout(handleTimeout, taskType === 'number' ? 1010 : 15010); // Ensure round times out if no input
         }
 
-        console.log('example round!');
         submitButton.style.display = 'flex';
         submitButton.style.visibility = 'visible';
 
         submitButton.onclick = function(event) {
-            event.preventDefault(); // prevent the default form submission when the submit button is clicked
-            updateTaskProgressBar();
-            manageProgressBar(1000);
+            event.preventDefault(); // prevent the default form submission on enter key press
+            updateTaskProgressBar();   
+            manageProgressBar(1000);     
             playBeep();
-            if (wordTaskStarted === false) {
-                processExampleInput(1000);
-            } else {
-                handleWordInput();
-            }
+            processExampleInput();
+
         };
 
-        wordInputField.onkeypress = function(event) {
+        wordInputField.onkeypress = function(event) { 
             if (event.key === 'Enter') {
-                updateTaskProgressBar();
-                manageProgressBar(1000);
-                playBeep();
                 event.preventDefault(); // prevent the default form submission on enter key press
-                if (wordTaskStarted === false) {
-                    processExampleInput();
-                } else {
-                    handleWordInput();
-                }
+                updateTaskProgressBar();   
+                manageProgressBar(1000);     
+                playBeep();
+                processExampleInput();
+               
             }
     };
 }
@@ -616,36 +603,28 @@ document.addEventListener('DOMContentLoaded', function() {
 function processExampleInput() {
     console.log('processing example input...');
 
-    updateTaskProgressBar();   
-    manageProgressBar(1000);     
-    playBeep();
-    //update round progress bar
-    // if (roundCount < totalRounds) {
-    //     updateRoundProgressBar(taskType === 'number' ? 1000 : 15000);
-    //     timeoutId = setTimeout(handleTimeout, taskType === 'number' ? 1010 : 15010); // Ensure round times out if no input
-    // }
+    // updateTaskProgressBar();   
+    // manageProgressBar(1000);     
+    // playBeep();
+
 
     const input = wordInputField.value.trim();
     let correctAnswer = examples[exampleIndex].answer;
-    
-    // //update round progress bar
-    // if (roundCount < totalRounds) {
-    //     updateRoundProgressBar(taskType === 'number' ? 1000 : 15000);
-    //     timeoutId = setTimeout(handleTimeout, taskType === 'number' ? 1010 : 15010); // Ensure round times out if no input
-    // }
     
     if (input.toLowerCase() === correctAnswer.toLowerCase()) {
         wordInputField.style.backgroundColor = 'lightgreen';
         wordInputField.style.borderColor = 'green';
         prompt.innerHTML = `Correct, the answer was <span style="color: green;">${correctAnswer}</span>`;
-        roundCount++;
+        // roundCount++;
+        updateTaskProgressBar();  
         manageProgressBar(1000);
         clearTimeout(timeoutId);
     } else {
         wordInputField.style.backgroundColor = 'lightcoral';
         wordInputField.style.borderColor = 'lightcoral';
         prompt.innerHTML = `Incorrect, the answer was <span style="color: lightcoral;">${correctAnswer}</span>`;
-        roundCount++;
+        // roundCount++;
+        updateTaskProgressBar();  
         manageProgressBar(1000);
         clearTimeout(timeoutId); // stop countdown
     }

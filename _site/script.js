@@ -462,7 +462,6 @@ document.addEventListener('DOMContentLoaded', function() {
         link.click();
         document.body.removeChild(link);
     }
-    
 
     function endSession() {
         clearTimeout(timeoutId);
@@ -581,6 +580,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         submitButton.onclick = function(event) {
             event.preventDefault(); // prevent the default form submission on enter key press
+            console.log('submit button clicked');
+            roundCount++;
             updateTaskProgressBar();   
             manageProgressBar(1000);     
             playBeep();
@@ -588,16 +589,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
         };
 
+        //this for some reason goes to playRound() while submitButton.onclick does not
         wordInputField.onkeypress = function(event) { 
             if (event.key === 'Enter') {
                 event.preventDefault(); // prevent the default form submission on enter key press
+                console.log('key pressed!');
                 updateTaskProgressBar();   
                 manageProgressBar(1000);     
-                playBeep();
                 processExampleInput();
                
             }
     };
+
 }
 
 function processExampleInput() {

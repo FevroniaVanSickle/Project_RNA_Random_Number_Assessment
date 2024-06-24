@@ -65,8 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const examples = [
         { cue: "carpet / alert / ink", answer: "red" },
-        { cue: "cane / daddy / plum", answer: "sugar" },
-        { cue: "dream/break/light", answer: "day" }
+        { cue: "cane / daddy / plum", answer: "sugar" }
       ];
 
     let currentwordIndex = 0;
@@ -185,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
         clearTimeout(timeoutId);
         roundCount = 0;
         //set totalRounds according to type
-        if (type === 'example'){
+        if (type === 'examples'){
             totalRounds = examples.length;
             console.log('total rounds = '+ totalRounds);
         }else{
@@ -286,6 +285,8 @@ document.addEventListener('DOMContentLoaded', function() {
         taskProg = `${(roundCount / totalRounds) * 100}%`;
         taskProgress.style.width = taskProg;
         console.log('task progress = '+ taskProg);
+        console.log('roundCount = ' + roundCount);
+        console.log('length = ' + examples.length);
         progressLabel.textContent = "Task Progress";
         progressLabel.style.color = 'green';
         console.log('updated task progress bar');
@@ -411,7 +412,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (input.toLowerCase() === correctAnswer.toLowerCase()) {
                 wordInputField.style.backgroundColor = 'lightgreen';
                 wordInputField.style.borderColor = 'green';
-                prompt.innerHTML = `Correct! The answer was <span style="color: green;">${correctAnswer}</span>`;
+                prompt.innerHTML = `Correct! The answer was  <span style="color: green;">${correctAnswer}</span>`;
                 roundCount++;
                 userData.words.push(input); // save the word input by the user
                 manageProgressBar(1000);
@@ -420,7 +421,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 wordInputField.style.backgroundColor = 'lightcoral';
                 wordInputField.style.borderColor = 'lightcoral';
-                prompt.innerHTML = `Incorrect, the answer was <span style="color: lightcoral;">${correctAnswer}</span>`;
+                prompt.innerHTML = `Incorrect, the answer was  <span style="color: lightcoral;">${correctAnswer}</span>`;
                 roundCount++;
                 userData.words.push(input);
                 manageProgressBar(1000);
@@ -606,11 +607,6 @@ document.addEventListener('DOMContentLoaded', function() {
 function processExampleInput() {
     console.log('processing example input...');
 
-    // updateTaskProgressBar();   
-    // manageProgressBar(1000);     
-    // playBeep();
-
-
     const input = wordInputField.value.trim();
     let correctAnswer = examples[exampleIndex].answer;
     
@@ -618,7 +614,6 @@ function processExampleInput() {
         wordInputField.style.backgroundColor = 'lightgreen';
         wordInputField.style.borderColor = 'green';
         prompt.innerHTML = `Correct, the answer was <span style="color: green;">${correctAnswer}</span>`;
-        // roundCount++;
         updateTaskProgressBar();  
         manageProgressBar(1000);
         clearTimeout(timeoutId);
@@ -626,7 +621,6 @@ function processExampleInput() {
         wordInputField.style.backgroundColor = 'lightcoral';
         wordInputField.style.borderColor = 'lightcoral';
         prompt.innerHTML = `Incorrect, the answer was <span style="color: lightcoral;">${correctAnswer}</span>`;
-        // roundCount++;
         updateTaskProgressBar();  
         manageProgressBar(1000);
         clearTimeout(timeoutId); // stop countdown

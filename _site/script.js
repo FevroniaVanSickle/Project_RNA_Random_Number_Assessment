@@ -1,6 +1,6 @@
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('hello world! :-)');
+    // console.log('hello world! :-)');
     const landingPage = document.getElementById('landing-page');
     const profilicIdInput = document.getElementById('prolific-id-input');
     const nextLandingButton = document.getElementById('next-landing');
@@ -162,7 +162,6 @@ document.addEventListener('DOMContentLoaded', function() {
         progressContainer.style.display = 'none';
         wordTestDescription.style.display = 'none';
         this.style.display = 'none'; 
-        examplesTaskStarted = false;
         // ensuring the form does not reload
         if (wordForm) {
             wordForm.onsubmit = function(event) {
@@ -189,20 +188,21 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('total rounds = '+ totalRounds);
         }else{
             totalRounds = type === 'number' ? totalNumEntries : words.length;
+            console.log('words.length is'+ words.length);
         }
         updateTaskProgressBar();
         if (type === 'number') {
             prompt.textContent = 'Enter a digit (1-9):';
             digitInputField.style.display = 'flex';
             wordInputField.style.display = 'none';
-        } else if (type == 'word'){
+        } else if (type === 'word'){
             prompt.textContent = 'Enter the word that best goes with the following: ';
             prompt.textContent += words[currentwordIndex].cue;            
             wordForm.style.display = 'block'; 
             digitInputField.style.display = 'none';
             wordInputField.style.display = 'block'; 
             wordInputField.focus();
-        } else if (type == 'examples') {
+        } else if (type === 'examples') {
             prompt.textContent = 'Enter the word that best goes with the following: ';
             prompt.textContent += examples[currentwordIndex].cue;            
             wordForm.style.display = 'block'; 
@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function manageProgressBar(pause) {
-        console.log('freeze/reset round ProgressBar');
+        // console.log('freeze/reset round ProgressBar');
         // Immediately stop any ongoing transition to freeze the current state
         roundProgress.style.transition = 'none';
         roundProgress.style.width = '100%';  // Assuming you want to freeze it fully filled
@@ -284,12 +284,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateTaskProgressBar() {
         taskProg = `${(roundCount / totalRounds) * 100}%`;
         taskProgress.style.width = taskProg;
-        console.log('task progress = '+ taskProg);
+        // console.log('task progress = '+ taskProg);
         console.log('roundCount = ' + roundCount);
-        console.log('length = ' + examples.length);
         progressLabel.textContent = "Task Progress";
         progressLabel.style.color = 'green';
-        console.log('updated task progress bar');
+        // console.log('updated task progress bar');
     }
 
     function updateRoundProgressBar(duration) {
@@ -323,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         else {
-            // wordInputField.style.backgroundColor = 'white';
+            wordInputField.style.backgroundColor = 'white';
             wordInputField.value = ''; // Clear previous input
             wordInputField.focus();
         }
@@ -568,8 +567,6 @@ document.addEventListener('DOMContentLoaded', function() {
    
    function startExampleRounds() {
 
-    console.log('startExampleRounds');
-
         //update round progress bar
         if (roundCount < totalRounds) {
             updateRoundProgressBar(taskType === 'number' ? 1000 : 15000);
@@ -581,7 +578,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         submitButton.onclick = function(event) {
             event.preventDefault(); // prevent the default form submission on enter key press
-            console.log('submit button clicked');
             roundCount++;
             updateTaskProgressBar();   
             manageProgressBar(1000);     
@@ -594,9 +590,9 @@ document.addEventListener('DOMContentLoaded', function() {
         wordInputField.onkeypress = function(event) { 
             if (event.key === 'Enter') {
                 event.preventDefault(); // prevent the default form submission on enter key press
-                console.log('key pressed!');
                 updateTaskProgressBar();   
-                manageProgressBar(1000);     
+                manageProgressBar(1000); 
+                playBeep();
                 processExampleInput();
                
             }
@@ -605,7 +601,6 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 function processExampleInput() {
-    console.log('processing example input...');
 
     const input = wordInputField.value.trim();
     let correctAnswer = examples[exampleIndex].answer;

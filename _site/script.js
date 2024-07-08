@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let totalRounds = 0;
     let taskType = 'number';
     let wordTaskStarted = false;
-    const totalNumEntries = 2;
+    const totalNumEntries = 10;
 
     // Setup word test information
     // from michelle: IDEALLY these would be read from a separate file, but they've been hardcoded for now

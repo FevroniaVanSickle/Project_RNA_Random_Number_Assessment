@@ -1,6 +1,5 @@
 
 document.addEventListener('DOMContentLoaded', function() {
-    // console.log('hello world! :-)');
     const landingPage = document.getElementById('landing-page');
     const profilicIdInput = document.getElementById('prolific-id-input');
     const nextLandingButton = document.getElementById('next-landing');
@@ -60,12 +59,37 @@ document.addEventListener('DOMContentLoaded', function() {
     const words = [
         { cue: "piece/mind/dating", answer: "game" },
         { cue: "hound/pressure/shot", answer: "blood" },
+        {cue: "Main/sweeper/light", answer:"street"},
+        {cue: "Nuclear/feud/album", answer:"family"},
+        {cue: "Basket/eight/snow", answer:"ball"},
+        {cue: "Food/forward/break", answer:"fast"},
+        {cue: "Cottage/swiss/cake", answer:"cheese"},
+        {cue: "Night/wrist/stop", answer:"watch"},
+        {cue: "Show/life/row", answer:"boat"},
+        {cue: "River/note/account", answer:"bank"},
+        {cue: "Loser/throat/spot", answer:"sore"},
+        {cue: "Sense/courtesy/place", answer:"common"},
+        {cue: "Dew/comb/bee", answer:"honey"},
+        {cue: "Fish/mine/rush", answer:"gold"},
+        {cue: "Political/surprise/line", answer:"party"},
+        {cue: "Print/berry/bird", answer:"blue"},
+        {cue: "Preserve/range/tropical", answer:"forest"},
+        {cue: "Fur/rack/tail", answer:"coat"},
+        {cue: "Flake/mobile/cone", answer:"snow"},
+        {cue: "Fountain/baking/pop", answer:"soda"},
+        {cue: "Safety/cushion/point", answer:"pin"},
+        {cue: "Worm/shelf/end", answer:"book"},
+        {cue: "Opera/hand/dish", answer:"soap"},
+        {cue: "Cream/skate/water", answer:"ice"},
+        {cue: "Duck/fold/dollar", answer:"bill"},
+        {cue: "Aid/rubber/wagon", answer:"band"},
+        {cue: "Cracker/fly/flight", answer:"fire"},
         { cue: "dream/break/light", answer: "day" }
     ];
 
     const examples = [
         { cue: "carpet / alert / ink", answer: "red" },
-        { cue: "cane / daddy / plum", answer: "sugar" }
+        {  cue: "cane / daddy / plum", answer: "sugar" }
       ];
 
     let currentwordIndex = 0;
@@ -158,10 +182,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     examplesButton.addEventListener('click', function() {
+
         wordForm.style.display = 'block';
         progressContainer.style.display = 'none';
         wordTestDescription.style.display = 'none';
         this.style.display = 'none'; 
+        taskType = 'examples';
         // ensuring the form does not reload
         if (wordForm) {
             wordForm.onsubmit = function(event) {
@@ -173,7 +199,9 @@ document.addEventListener('DOMContentLoaded', function() {
             progressContainer.style.visibility = 'visible';
             examplesButton.style.display = 'none'; 
             setupTask('examples');
-            startExampleRounds();
+            if (taskType === 'examples'){
+                startExampleRounds();
+            }
         }).catch(error => {
             console.error('Error in setCountdown for example:', error);
         });;
@@ -181,14 +209,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function setupTask(type) {
         clearTimeout(timeoutId);
+        taskType = type; //should stop word from thinking it's examples
         roundCount = 0;
         //set totalRounds according to type
         if (type === 'examples'){
             totalRounds = examples.length;
-            console.log('total rounds = '+ totalRounds);
         }else{
             totalRounds = type === 'number' ? totalNumEntries : words.length;
-            console.log('words.length is'+ words.length);
         }
         updateTaskProgressBar();
         if (type === 'number') {
@@ -197,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
             wordInputField.style.display = 'none';
         } else if (type === 'word'){
             prompt.textContent = 'Enter the word that best goes with the following: ';
-            prompt.textContent += words[currentwordIndex].cue;            
+            prompt.textContent += words[currentwordIndex].cue;
             wordForm.style.display = 'block'; 
             digitInputField.style.display = 'none';
             wordInputField.style.display = 'block'; 
@@ -214,14 +241,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function manageProgressBar(pause) {
-        // console.log('freeze/reset round ProgressBar');
         // Immediately stop any ongoing transition to freeze the current state
         roundProgress.style.transition = 'none';
         roundProgress.style.width = '100%';  // Assuming you want to freeze it fully filled
     
         // Set a timeout to reset the progress bar after the specified pause
         setTimeout(() => {
-            // console.log('Resetting round progress bar');
             roundProgress.style.transition = 'none';
             roundProgress.style.width = '100%';  // Resets the bar to full width
         }, pause);
@@ -284,11 +309,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateTaskProgressBar() {
         taskProg = `${(roundCount / totalRounds) * 100}%`;
         taskProgress.style.width = taskProg;
-        // console.log('task progress = '+ taskProg);
-        console.log('roundCount = ' + roundCount);
         progressLabel.textContent = "Task Progress";
         progressLabel.style.color = 'green';
-        // console.log('updated task progress bar');
     }
 
     function updateRoundProgressBar(duration) {
@@ -311,7 +333,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function playRound() {
 
         updateTaskProgressBar();
-        playBeep();
+        // playBeep();
 
         if (taskType === 'word' && wordTaskStarted === false) return;
 
@@ -319,20 +341,14 @@ document.addEventListener('DOMContentLoaded', function() {
             digitInputField.style.backgroundColor = 'white'; // Reset background color
             digitInputField.value = ''; // Clear previous input
             digitInputField.focus();
+            prompt.textContent = 'Enter a digit (1-9):';
         }
-
         else {
             wordInputField.style.backgroundColor = 'white';
             wordInputField.value = ''; // Clear previous input
             wordInputField.focus();
         }
 
-        prompt.textContent = taskType === 'number' ? 'Enter a digit (1-9):' : 'Enter the word that best goes with the following: ';
-
-        if (taskType === 'word'){
-            prompt.textContent += words[currentwordIndex].cue;
-        }
-        
         if (roundCount < totalRounds) {
             updateRoundProgressBar(taskType === 'number' ? 1000 : 15000);
             timeoutId = setTimeout(handleTimeout, taskType === 'number' ? 1010 : 15010); // Ensure round times out if no input
@@ -342,7 +358,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function handleTimeout() {
-        console.log(handleTimeout);
+        // console.log(handleTimeout); //seems problematic
         if (taskType === 'word' && wordTaskStarted === false) return;
 
         if (roundCount >= totalRounds) {
@@ -359,7 +375,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 userData.words.push('');
                 roundCount++;
             }
-            else {
+            else if (taskType === 'examples'){
                 wordInputField.style.backgroundColor = 'lightcoral';
                 roundCount++;
             }
@@ -380,16 +396,17 @@ document.addEventListener('DOMContentLoaded', function() {
     wordInputField.addEventListener('keypress', function(e) {
         if (e.key === 'Enter' && taskType === 'word') {
             e.preventDefault(); // prevent form submission 
-            processInput(this.value.trim());
+            processInput(this.value.trim()); //this does things correctly 
         }
     });
 
     submitButton.addEventListener('click', function() {
-        handleWordInput();
+        processInput(wordInputField.value.trim());
     });
 
-    function processInput(input) {
+    function processInput() {
         const correctAnswer = words[currentwordIndex].answer;
+        const input = wordInputField.value.trim();
     
         if (taskType === 'number') {
             const isValidInput = /^[1-9]$/.test(input);
@@ -411,7 +428,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (input.toLowerCase() === correctAnswer.toLowerCase()) {
                 wordInputField.style.backgroundColor = 'lightgreen';
                 wordInputField.style.borderColor = 'green';
-                prompt.innerHTML = `Correct! The answer was  <span style="color: green;">${correctAnswer}</span>`;
+                prompt.innerHTML = `Correct, the answer was&nbsp;<span style="color: green;">${correctAnswer}</span>`;
                 roundCount++;
                 userData.words.push(input); // save the word input by the user
                 manageProgressBar(1000);
@@ -420,14 +437,24 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 wordInputField.style.backgroundColor = 'lightcoral';
                 wordInputField.style.borderColor = 'lightcoral';
-                prompt.innerHTML = `Incorrect, the answer was  <span style="color: lightcoral;">${correctAnswer}</span>`;
+                prompt.innerHTML = `Incorrect, the answer was&nbsp;<span style="color: lightcoral;">${correctAnswer}</span>`;
                 roundCount++;
                 userData.words.push(input);
                 manageProgressBar(1000);
                 clearTimeout(timeoutId); // stop countdown
                 setTimeout(playRound, 1000);
             }
-        }
+            /////
+            setTimeout(() => {
+                wordInputField.value = '';
+                wordInputField.style.backgroundColor = 'white';
+                if (++currentwordIndex < words.length) {
+                    prompt.textContent = 'Enter the word that best goes with the following: ' + words[currentwordIndex].cue;
+                } else {
+                    endSession();
+                }
+            }, 2000); // show result for 5 seconds
+            }
     }
 
     function downloadCSV() {
@@ -463,7 +490,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.removeChild(link);
     }
 
-    function endSession() {
+    function endSession(){
         clearTimeout(timeoutId);
         digitInputField.disabled = true;
         digitInputField.style.display = 'none';
@@ -471,9 +498,12 @@ document.addEventListener('DOMContentLoaded', function() {
         prompt.textContent = 'Task completed.';
     
         if (taskType === 'number') {
-            taskType = 'word';  // update task type 
-            transitionToWordTask(); 
-        } else {
+            taskType = 'examples';  // update task type 
+            transitionToWordTask()
+        } else if (taskType === 'examples'){
+            taskType = 'word';
+            transitionToWordTask();
+        }else {
             // final completion of all tasks
             wordInputField.disabled = true;
             wordInputField.style.display = 'none';
@@ -487,44 +517,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    wordInputField.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter' && taskType === 'word') {
-            e.preventDefault();
-            handleWordInput();
-        }
-    });
-
-    function handleWordInput() {
-        const input = wordInputField.value.trim();
-
-        if (wordTaskStarted === true) {
-            processInput(input);
-            displayResult(input);
-        }
-
-    }
-    
-    function transitionToWordTask() {
+    function transitionToWordTask() { //fiddle with this next
         digitTestContainer3.style.display = 'none';
         startWordTaskButton.style.display = 'none';
         submitButton.style.display = 'none';
         progressContainer.style.visibility = 'hidden';
         wordForm.style.display = 'flex';
-        wordEntryContainer.style.display = 'flex';
-        examplesButton.style.display = 'flex'; // show button for examples
-        
-    }
-
-    function displayResult(input) {
-        setTimeout(() => {
-            wordInputField.value = '';
-            wordInputField.style.backgroundColor = 'white';
-            if (++currentwordIndex < words.length) {
-                prompt.textContent = words[currentwordIndex].cue;
-            } else {
-                endSession();
-            }
-        }, 5000); // show result for 5 seconds
+        wordEntryContainer.style.display = 'flex';        
     }
     
     // michelle: theoretical implementation of uploading to google drive, reused from another independent project
@@ -566,7 +565,11 @@ document.addEventListener('DOMContentLoaded', function() {
    // *****************  EXAMPLE METHODS *********************************** //
    
    function startExampleRounds() {
-
+    // if (taskType === 'word') {
+    //     console.log('in example as word');
+    //     // return;
+    // }
+    // console.log('in example and task type is: ' + taskType);
         //update round progress bar
         if (roundCount < totalRounds) {
             updateRoundProgressBar(taskType === 'number' ? 1000 : 15000);
@@ -577,33 +580,33 @@ document.addEventListener('DOMContentLoaded', function() {
         submitButton.style.visibility = 'visible';
 
         submitButton.onclick = function(event) {
-            event.preventDefault(); // prevent the default form submission on enter key press
-            roundCount++;
-            updateTaskProgressBar();   
-            manageProgressBar(1000);     
-            playBeep();
-            processExampleInput();
-
-        };
-
-        //this for some reason goes to playRound() while submitButton.onclick does not
-        wordInputField.onkeypress = function(event) { 
-            if (event.key === 'Enter') {
-                event.preventDefault(); // prevent the default form submission on enter key press
+            if (taskType=== 'examples'){ //this is needed or else word task will time out
+                roundCount++;
                 updateTaskProgressBar();   
                 manageProgressBar(1000); 
-                playBeep();
-                processExampleInput();
-               
+                // playBeep();
+                processExampleInput(); 
             }
-    };
+        };
 
+        wordInputField.addEventListener('keypress', function(e) {
+            if (taskType=== 'examples'){ //this is needed or else word task will time out
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // prevent form submission 
+                    roundCount++;
+                    updateTaskProgressBar();   
+                    manageProgressBar(1000); 
+                    // playBeep();
+                    processExampleInput(); 
+                }
+            }
+        });
 }
 
 function processExampleInput() {
 
     const input = wordInputField.value.trim();
-    let correctAnswer = examples[exampleIndex].answer;
+    const correctAnswer = examples[exampleIndex].answer;
     
     if (input.toLowerCase() === correctAnswer.toLowerCase()) {
         wordInputField.style.backgroundColor = 'lightgreen';

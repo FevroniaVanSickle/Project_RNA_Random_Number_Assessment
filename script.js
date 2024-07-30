@@ -315,8 +315,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateTaskProgressBar() {
         taskProg = `${(roundCount / totalRounds) * 100}%`;
         taskProgress.style.width = taskProg;
-        progressLabel.textContent = "Task Progress";
-        progressLabel.style.color = 'green';
+        // progressLabel.textContent = "Task Progress";
+        // progressLabel.style.color = 'green';
     }
 
     function updateRoundProgressBar(duration) {
@@ -528,8 +528,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    function transitionToWordTask() { //fiddle with this next
-        digitTestContainer3.style.display = 'none';
+    function transitionToWordTask() { 
         startWordTaskButton.style.display = 'none';
         submitButton.style.display = 'none';
         progressContainer.style.visibility = 'hidden';

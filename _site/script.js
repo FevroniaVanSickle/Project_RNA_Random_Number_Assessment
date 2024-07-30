@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', function() {
     const landingPage = document.getElementById('landing-page');
     const profilicIdInput = document.getElementById('prolific-id-input');
@@ -25,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const wordForm = document.getElementById('word-form');
     const wordTestContainer = document.getElementById('word-test-container');
     const wordTestDescription = document.getElementById('word-test-description');
+    const wordTestInstruction = document.getElementById('word-test-instruction');
     const submitButton = document.getElementById('submit-word');
 
     // progress bar
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let totalRounds = 0;
     let taskType = 'number';
     let wordTaskStarted = false;
-    const totalNumEntries = 10;
+    const totalNumEntries = 2;
 
     // Setup word test information
     // from michelle: IDEALLY these would be read from a separate file, but they've been hardcoded for now
@@ -100,6 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle the 'Start Number Task' button click to begin the task
     startNumberTaskButton.addEventListener('click', function() {
         this.style.display = 'none';
+        wordTestInstruction.style.display = 'none';
         digitTestDescription3.style.display = 'none';
         setCountdown('number').then(() => {
             numberEntryContainer.style.display = 'block';
@@ -112,11 +113,40 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    examplesButton.addEventListener('click', function() {
+
+        wordForm.style.display = 'block';
+        wordTestInstruction.style.display = 'none';
+        progressContainer.style.display = 'none';
+        wordTestDescription.style.display = 'none';
+        this.style.display = 'none'; 
+        prompt.style.display = 'none';
+        taskType = 'examples';
+        // ensuring the form does not reload
+        if (wordForm) {
+            wordForm.onsubmit = function(event) {
+                event.preventDefault();
+            };
+        }
+        setCountdown('example').then(() => {
+            progressContainer.style.display = 'block';
+            progressContainer.style.visibility = 'visible';
+            examplesButton.style.display = 'none'; 
+            setupTask('examples');
+            if (taskType === 'examples'){
+                startExampleRounds();
+            }
+        }).catch(error => {
+            console.error('Error in setCountdown for example:', error);
+        });;
+    });
+
     // 'Start Word Task' button event listener
     startWordTaskButton.addEventListener('click', function() {
        
         // clear the page
         this.style.display = 'none';
+        wordTestInstruction.style.display = 'none';
         progressContainer.style.visibility = 'hidden';
 
         // countdown 
@@ -145,6 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // reinstate progress bars
             progressContainer.style.display = 'block';
             progressContainer.style.visibility = 'visible';
+            taskProgress.style.visibility = 'hidden';
             setupTask('word');
             playRound();
         }).catch(error => {
@@ -181,32 +212,6 @@ document.addEventListener('DOMContentLoaded', function() {
         digitTestContainer3.style.display = 'block';
     });
 
-    examplesButton.addEventListener('click', function() {
-
-        wordForm.style.display = 'block';
-        progressContainer.style.display = 'none';
-        wordTestDescription.style.display = 'none';
-        this.style.display = 'none'; 
-        taskType = 'examples';
-        // ensuring the form does not reload
-        if (wordForm) {
-            wordForm.onsubmit = function(event) {
-                event.preventDefault();
-            };
-        }
-        setCountdown('example').then(() => {
-            progressContainer.style.display = 'block';
-            progressContainer.style.visibility = 'visible';
-            examplesButton.style.display = 'none'; 
-            setupTask('examples');
-            if (taskType === 'examples'){
-                startExampleRounds();
-            }
-        }).catch(error => {
-            console.error('Error in setCountdown for example:', error);
-        });;
-    });
-
     function setupTask(type) {
         clearTimeout(timeoutId);
         taskType = type; //should stop word from thinking it's examples
@@ -230,6 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
             wordInputField.style.display = 'block'; 
             wordInputField.focus();
         } else if (type === 'examples') {
+            prompt.style.display = 'block';
             prompt.textContent = 'Enter the word that best goes with the following: ';
             prompt.textContent += examples[currentwordIndex].cue;            
             wordForm.style.display = 'block'; 
@@ -331,13 +337,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function playRound() {
-
         updateTaskProgressBar();
-        // playBeep();
+        playBeep();
 
         if (taskType === 'word' && wordTaskStarted === false) return;
 
         if (taskType === 'number') {
+            updateTaskProgressBar();
             digitInputField.style.backgroundColor = 'white'; // Reset background color
             digitInputField.value = ''; // Clear previous input
             digitInputField.focus();
@@ -358,7 +364,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function handleTimeout() {
-        // console.log(handleTimeout); //seems problematic
         if (taskType === 'word' && wordTaskStarted === false) return;
 
         if (roundCount >= totalRounds) {
@@ -379,18 +384,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 wordInputField.style.backgroundColor = 'lightcoral';
                 roundCount++;
             }
-
             setTimeout(playRound, 1000);
         }
     } 
 
     // handles input field for number tasks
     digitInputField.addEventListener('input', function(e) {
+        e.preventDefault();
         processInput(this.value.trim());
-        // prevents any action if the input is not a single digit between 1-9
-        if (!/^[1-9]$/.test(this.value.trim())) {
-            e.preventDefault();
-        }
+
     });
     // handle enter key for word task
     wordInputField.addEventListener('keypress', function(e) {
@@ -404,33 +406,41 @@ document.addEventListener('DOMContentLoaded', function() {
         processInput(wordInputField.value.trim());
     });
 
-    function processInput() {
+    function processInput(input) {
         const correctAnswer = words[currentwordIndex].answer;
-        const input = wordInputField.value.trim();
+        progressContainer.style.visibility = 'visible';
     
         if (taskType === 'number') {
             const isValidInput = /^[1-9]$/.test(input);
             if (isValidInput) {
                 digitInputField.style.backgroundColor = 'lightgreen';
                 digitInputField.style.borderColor = 'green';
-                prompt.textContent = 'Correct input!';
                 roundCount++;
                 userData.numbers.push(input); // save the number input by the user
                 manageProgressBar(1000);
+                updateTaskProgressBar();
                 clearTimeout(timeoutId); // stop countdown
                 setTimeout(playRound, 1000); // proceed to next round after a delay
             } else {
                 digitInputField.style.backgroundColor = 'lightcoral'; 
                 digitInputField.style.borderColor = 'lightcoral';
                 prompt.innerHTML = '<span style="color: lightcoral;">Number must be 1-9</span>';
+                roundCount++;
+                userData.words.push(input); // save the word input by the user
+                manageProgressBar(1000);
+                updateTaskProgressBar();
+                clearTimeout(timeoutId);
+                setTimeout(playRound, 1030);//must be this high to avoid 'too slow' message
             }
         } else if (taskType === 'word') {
             if (input.toLowerCase() === correctAnswer.toLowerCase()) {
+                taskProgress.style.visibility = 'visible';
                 wordInputField.style.backgroundColor = 'lightgreen';
                 wordInputField.style.borderColor = 'green';
                 prompt.innerHTML = `Correct, the answer was&nbsp;<span style="color: green;">${correctAnswer}</span>`;
                 roundCount++;
                 userData.words.push(input); // save the word input by the user
+                updateTaskProgressBar();
                 manageProgressBar(1000);
                 clearTimeout(timeoutId);
                 setTimeout(playRound, 1000);
@@ -441,6 +451,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 roundCount++;
                 userData.words.push(input);
                 manageProgressBar(1000);
+                updateTaskProgressBar();
                 clearTimeout(timeoutId); // stop countdown
                 setTimeout(playRound, 1000);
             }
@@ -522,6 +533,7 @@ document.addEventListener('DOMContentLoaded', function() {
         startWordTaskButton.style.display = 'none';
         submitButton.style.display = 'none';
         progressContainer.style.visibility = 'hidden';
+        taskProgress.style.visibility = 'hidden';
         wordForm.style.display = 'flex';
         wordEntryContainer.style.display = 'flex';        
     }
@@ -565,12 +577,7 @@ document.addEventListener('DOMContentLoaded', function() {
    // *****************  EXAMPLE METHODS *********************************** //
    
    function startExampleRounds() {
-    // if (taskType === 'word') {
-    //     console.log('in example as word');
-    //     // return;
-    // }
-    // console.log('in example and task type is: ' + taskType);
-        //update round progress bar
+   
         if (roundCount < totalRounds) {
             updateRoundProgressBar(taskType === 'number' ? 1000 : 15000);
             timeoutId = setTimeout(handleTimeout, taskType === 'number' ? 1010 : 15010); // Ensure round times out if no input
@@ -584,7 +591,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 roundCount++;
                 updateTaskProgressBar();   
                 manageProgressBar(1000); 
-                // playBeep();
+                playBeep();
                 processExampleInput(); 
             }
         };
@@ -596,7 +603,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     roundCount++;
                     updateTaskProgressBar();   
                     manageProgressBar(1000); 
-                    // playBeep();
+                    playBeep();
                     processExampleInput(); 
                 }
             }
@@ -606,7 +613,8 @@ document.addEventListener('DOMContentLoaded', function() {
 function processExampleInput() {
 
     const input = wordInputField.value.trim();
-    const correctAnswer = examples[exampleIndex].answer;
+    let correctAnswer = examples[exampleIndex].answer;
+    taskProgress.style.visibility = 'visible';
     
     if (input.toLowerCase() === correctAnswer.toLowerCase()) {
         wordInputField.style.backgroundColor = 'lightgreen';
@@ -638,14 +646,15 @@ function processExampleInput() {
                 
         } else {
             // all examples are done, show start word task button
+            progressContainer.style.visibility = 'hidden';
             wordInputField.style.visibility = 'hidden';
             wordInputField.value = '';
             wordInputField.style.backgroundColor = 'white';
             submitButton.style.visibility = 'hidden';
+            wordTestInstruction.style.display = 'block';
             startWordTaskButton.style.display = 'block'; // now show start button to begin the actual task
             prompt.style.visibility = 'hidden';
         }
     }, 2000); // display correct answer for 3 seconds
 }
 })
-

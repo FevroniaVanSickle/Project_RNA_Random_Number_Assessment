@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const landingPage = document.getElementById('landing-page');
-    const profilicIdInput = document.getElementById('prolific-id-input');
+    const prolificIdInput = document.getElementById('prolific-id-input');
     const nextLandingButton = document.getElementById('next-landing');
 
     // number test
@@ -42,9 +42,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let timeoutId;
     let roundCount = 0;
 
-    profilicIdInput.focus();
+    prolificIdInput.focus();
     let userData = {
-        'profilic_id': '', // replace 'user_profilic_id' with the actual profilic ID of the user
+        'prolific_id': '', // replace 'user_prolific_id' with the actual prolific ID of the user
         'numbers': [],
         'words': []
     };
@@ -97,9 +97,79 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ********************** START WORD AND NUMBER TASK BUTTONS & START TASK STUFF ****************** //
 
-    // Handle the 'Start Number Task' button click to begin the task
+// Handle submit button to begin assessment 
+    nextLandingButton.addEventListener('click', function(){
+        handleNextLandingButton();
+    });
+    prolificIdInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter'){
+            e.preventDefault()
+            handleNextLandingButton();
+        }
+    });
+    function handleNextLandingButton(){
+        if (!prolificIdInput.value){ // prevent user from continuing without ID
+            return;         
+        }
+        else{
+            landingPage.style.display = 'none';
+            digitTestContainer1.style.display = 'block';
+            digitTestDescription1.style.display = 'block';
+            digitNextButton1.style.display = 'block';
+            digitNextButton1.focus();
+            userData.prolific_id = prolificIdInput.value; // Save the Prolific ID when the next button is clicked
+        }
+    }
+    // Handle next buttons for digit containers
+    digitNextButton1.addEventListener('click', function() {
+        handleDigitNext1();
+    });
+    digitNextButton1.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter'){
+            e.preventDefault()
+            handleDigitNext1();
+        }
+    });
+    function handleDigitNext1(){
+        digitTestDescription1.style.display = 'none';
+        digitTestContainer1.style.display = 'none';
+        digitTestDescription2.style.display = 'block';
+        digitTestContainer2.style.display = 'block';
+        //set up button
+        digitNextButton2.style.display = 'block';
+        digitNextButton2.focus();
+    }
+    digitNextButton2.addEventListener('click', function() {
+            handleDigitNext2();
+        });
+    digitNextButton2.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter'){
+            e.preventDefault()
+            handleDigitNext2();
+        }
+    });
+    function handleDigitNext2(){
+        digitTestDescription2.style.display = 'none';
+        digitTestContainer2.style.display = 'none';
+        digitTestDescription3.style.display = 'block';
+        digitTestContainer3.style.display = 'block';
+        startNumberTaskButton.style.display = 'block';
+        startNumberTaskButton.focus();
+
+    }
+
+     // Handle the 'Start Number Task' button click to begin the task
     startNumberTaskButton.addEventListener('click', function() {
-        this.style.display = 'none';
+        handleStartNumberTask ();
+    });
+    startNumberTaskButton.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter'){
+            e.preventDefault();
+            handleStartNumberTask();
+        }
+    });
+    function handleStartNumberTask(){
+        startNumberTaskButton.style.display = 'none';
         wordTestInstruction.style.display = 'none';
         digitTestDescription3.style.display = 'none';
         setCountdown('number').then(() => {
@@ -111,17 +181,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }).catch(error => {
             console.error('Error in setCountdown for number:', error);
         });
-    });
+    }
 
+    // Handle the 'Try an example' button to begin example word task
     examplesButton.addEventListener('click', function() {
-
+        handleExamplesButton();
+    });
+    examplesButton.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter'){
+            e.preventDefault();
+            handleExamplesButton();
+        }
+    });
+   function handleExamplesButton(){
         wordForm.style.display = 'block';
         wordTestInstruction.style.display = 'none';
         progressContainer.style.display = 'none';
         wordTestDescription.style.display = 'none';
-        this.style.display = 'none'; 
+        examplesButton.style.display = 'none'; 
         prompt.style.display = 'none';
-        taskType = 'examples';
+        // taskType = 'examples';
         // ensuring the form does not reload
         if (wordForm) {
             wordForm.onsubmit = function(event) {
@@ -139,13 +218,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }).catch(error => {
             console.error('Error in setCountdown for example:', error);
         });;
-    });
-
-    // 'Start Word Task' button event listener
+   }
+    // Handle 'Start Word Task' button to begin word task
     startWordTaskButton.addEventListener('click', function() {
-       
+        handleStartWordTask();
+    });
+    startWordTaskButton.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter'){
+            e.preventDefault();
+            handleStartWordTask();
+        }
+    });
+    function handleStartWordTask(){
         // clear the page
-        this.style.display = 'none';
+        startWordTaskButton.style.display = 'none';
         wordTestInstruction.style.display = 'none';
         progressContainer.style.visibility = 'hidden';
 
@@ -181,37 +267,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }).catch(error => {
             console.error('Error in setCountdown for word:', error);
         });;
-        
-    });
+    }
     
-    nextLandingButton.addEventListener('click', function() {
-        if (!profilicIdInput.value){ // prevent user from continuing without ID
-            return;
-        }
-        else{
-            landingPage.style.display = 'none';
-            digitTestDescription1.style.display = 'block';
-            digitTestContainer1.style.display = 'block';
-            userData.profilic_id = profilicIdInput.value; // Save the Prolific ID when the next button is clicked
-            // digitTestContainer3.style.display = 'block';
-        }
-        
-    });
-    
-    digitNextButton1.addEventListener('click', function() {
-        digitTestDescription1.style.display = 'none';
-        digitTestContainer1.style.display = 'none';
-        digitTestDescription2.style.display = 'block';
-        digitTestContainer2.style.display = 'block';
-    });
-
-    digitNextButton2.addEventListener('click', function() {
-        digitTestDescription2.style.display = 'none';
-        digitTestContainer2.style.display = 'none';
-        digitTestDescription3.style.display = 'block';
-        digitTestContainer3.style.display = 'block';
-    });
-
     function setupTask(type) {
         clearTimeout(timeoutId);
         taskType = type; //should stop word from thinking it's examples
@@ -227,6 +284,7 @@ document.addEventListener('DOMContentLoaded', function() {
             prompt.textContent = 'Enter a digit (1-9):';
             digitInputField.style.display = 'flex';
             wordInputField.style.display = 'none';
+            digitInputField.focus();
         } else if (type === 'word'){
             prompt.textContent = 'Enter the word that best goes with the following: ';
             prompt.textContent += words[currentwordIndex].cue;
@@ -392,10 +450,10 @@ document.addEventListener('DOMContentLoaded', function() {
     digitInputField.addEventListener('input', function(e) {
         e.preventDefault();
         processInput(this.value.trim());
-
     });
+
     // handle enter key for word task
-    wordInputField.addEventListener('keypress', function(e) {
+    wordInputField.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && taskType === 'word') {
             e.preventDefault(); // prevent form submission 
             processInput(this.value.trim()); //this does things correctly 
@@ -437,7 +495,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 taskProgress.style.visibility = 'visible';
                 wordInputField.style.backgroundColor = 'lightgreen';
                 wordInputField.style.borderColor = 'green';
-                prompt.innerHTML = `Correct, the answer was&nbsp;<span style="color: green;">${correctAnswer}</span>`;
                 roundCount++;
                 userData.words.push(input); // save the word input by the user
                 updateTaskProgressBar();
@@ -447,7 +504,6 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 wordInputField.style.backgroundColor = 'lightcoral';
                 wordInputField.style.borderColor = 'lightcoral';
-                prompt.innerHTML = `Incorrect, the answer was&nbsp;<span style="color: lightcoral;">${correctAnswer}</span>`;
                 roundCount++;
                 userData.words.push(input);
                 manageProgressBar(1000);
@@ -470,7 +526,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function downloadCSV() {
         // initialize CSV content with headers
-        let csvContent = 'profilic_id';
+        let csvContent = 'prolific_id';
         for (let i = 0; i < userData.numbers.length; i++) {
             csvContent += ',N' + (i + 1);
         }
@@ -480,7 +536,7 @@ document.addEventListener('DOMContentLoaded', function() {
         csvContent += '\n';
     
         // add user data
-        csvContent += userData.profilic_id;
+        csvContent += userData.prolific_id;
         for (let i = 0; i < userData.numbers.length; i++) {
             csvContent += ',' + userData.numbers[i];
         }
@@ -512,6 +568,7 @@ document.addEventListener('DOMContentLoaded', function() {
             taskType = 'examples';  // update task type 
             transitionToWordTask()
         } else if (taskType === 'examples'){
+            console.log('examples ended');
             taskType = 'word';
             transitionToWordTask();
         }else {
@@ -534,45 +591,14 @@ document.addEventListener('DOMContentLoaded', function() {
         progressContainer.style.visibility = 'hidden';
         taskProgress.style.visibility = 'hidden';
         wordForm.style.display = 'flex';
-        wordEntryContainer.style.display = 'flex';        
+        wordEntryContainer.style.display = 'flex'; 
+        //necessary for enter key to work for examples button   
+        if (taskType === 'examples'){
+            examplesButton.style.visibility = 'block';
+            examplesButton.focus();
+        }  
     }
-    
-    // michelle: theoretical implementation of uploading to google drive, reused from another independent project
-    // you will need to use node.js or something similar to make this actually happen, as jeckyll through github pages is static
-    function uploadFile(authToken, fileData, fileName) {
-        const boundary = '-------314159265358979323846';
-        const delimiter = "\r\n--" + boundary + "\r\n";
-        const close_delim = "\r\n--" + boundary + "--";
 
-        const contentType = 'text/csv';
-        const metadata = {
-            'name': fileName,
-            'mimeType': contentType
-        };
-
-        const multipartRequestBody =
-            delimiter +
-            'Content-Type: application/json\r\n\r\n' +
-            JSON.stringify(metadata) +
-            delimiter +
-            'Content-Type: ' + contentType + '\r\n' +
-            '\r\n' +
-            fileData +
-            close_delim;
-
-        const request = new XMLHttpRequest();
-        request.open('POST', 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', true);
-        request.setRequestHeader('Authorization', 'Bearer ' + authToken);
-        request.setRequestHeader('Content-Type', 'multipart/related; boundary="' + boundary + '"');
-        request.onreadystatechange = function() {
-            if (request.readyState === 4 && request.status === 200) {
-                console.log('File uploaded successfully');
-            }
-        };
-
-        request.send(multipartRequestBody);
-    }
-    
    // *****************  EXAMPLE METHODS *********************************** //
    
    function startExampleRounds() {
@@ -584,6 +610,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         submitButton.style.display = 'flex';
         submitButton.style.visibility = 'visible';
+        wordInputField.focus();
 
         submitButton.onclick = function(event) {
             if (taskType=== 'examples'){ //this is needed or else word task will time out
@@ -638,6 +665,7 @@ function processExampleInput() {
             correctAnswer = examples[exampleIndex].answer;
             wordInputField.value = '';
             wordInputField.style.backgroundColor = 'white';
+            wordInputField.focus();
             if (roundCount < totalRounds) {
                 updateRoundProgressBar(taskType === 'number' ? 1000 : 15000);
                 timeoutId = setTimeout(handleTimeout, taskType === 'number' ? 1010 : 15010); // Ensure round times out if no input
@@ -652,6 +680,7 @@ function processExampleInput() {
             submitButton.style.visibility = 'hidden';
             wordTestInstruction.style.display = 'block';
             startWordTaskButton.style.display = 'block'; // now show start button to begin the actual task
+            startWordTaskButton.focus();
             prompt.style.visibility = 'hidden';
         }
     }, 2000); // display correct answer for 3 seconds

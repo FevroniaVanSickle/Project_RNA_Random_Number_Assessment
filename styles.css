@@ -33,6 +33,22 @@ body {
     gap: 10px;
 }
 
+#digit-next-1{
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+#digit-next-2 {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+#start-number-task {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
 #task-countdown-container {
     padding: 0px;
     max-width: 400px;

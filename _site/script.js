@@ -52,43 +52,42 @@ document.addEventListener('DOMContentLoaded', function() {
     let totalRounds = 0;
     let taskType = 'number';
     let wordTaskStarted = false;
-    const totalNumEntries = 10;
+    const totalNumEntries = 2;
 
     // Setup word test information
-    // from michelle: IDEALLY these would be read from a separate file, but they've been hardcoded for now
     const words = [
-        { cue: "piece/mind/dating", answer: "game" },
-        { cue: "hound/pressure/shot", answer: "blood" },
-        {cue: "Main/sweeper/light", answer:"street"},
-        {cue: "Nuclear/feud/album", answer:"family"},
-        {cue: "Basket/eight/snow", answer:"ball"},
-        {cue: "Food/forward/break", answer:"fast"},
-        {cue: "Cottage/swiss/cake", answer:"cheese"},
-        {cue: "Night/wrist/stop", answer:"watch"},
-        {cue: "Show/life/row", answer:"boat"},
-        {cue: "River/note/account", answer:"bank"},
-        {cue: "Loser/throat/spot", answer:"sore"},
-        {cue: "Sense/courtesy/place", answer:"common"},
-        {cue: "Dew/comb/bee", answer:"honey"},
-        {cue: "Fish/mine/rush", answer:"gold"},
-        {cue: "Political/surprise/line", answer:"party"},
-        {cue: "Print/berry/bird", answer:"blue"},
-        {cue: "Preserve/range/tropical", answer:"forest"},
-        {cue: "Fur/rack/tail", answer:"coat"},
-        {cue: "Flake/mobile/cone", answer:"snow"},
-        {cue: "Fountain/baking/pop", answer:"soda"},
-        {cue: "Safety/cushion/point", answer:"pin"},
-        {cue: "Worm/shelf/end", answer:"book"},
-        {cue: "Opera/hand/dish", answer:"soap"},
-        {cue: "Cream/skate/water", answer:"ice"},
-        {cue: "Duck/fold/dollar", answer:"bill"},
-        {cue: "Aid/rubber/wagon", answer:"band"},
-        {cue: "Cracker/fly/flight", answer:"fire"},
+        // { cue: "piece/mind/dating", answer: "game" },
+        // { cue: "hound/pressure/shot", answer: "blood" },
+        // {cue: "Main/sweeper/light", answer:"street"},
+        // {cue: "Nuclear/feud/album", answer:"family"},
+        // {cue: "Basket/eight/snow", answer:"ball"},
+        // {cue: "Food/forward/break", answer:"fast"},
+        // {cue: "Cottage/swiss/cake", answer:"cheese"},
+        // {cue: "Night/wrist/stop", answer:"watch"},
+        // {cue: "Show/life/row", answer:"boat"},
+        // {cue: "River/note/account", answer:"bank"},
+        // {cue: "Loser/throat/spot", answer:"sore"},
+        // {cue: "Sense/courtesy/place", answer:"common"},
+        // {cue: "Dew/comb/bee", answer:"honey"},
+        // {cue: "Fish/mine/rush", answer:"gold"},
+        // {cue: "Political/surprise/line", answer:"party"},
+        // {cue: "Print/berry/bird", answer:"blue"},
+        // {cue: "Preserve/range/tropical", answer:"forest"},
+        // {cue: "Fur/rack/tail", answer:"coat"},
+        // {cue: "Flake/mobile/cone", answer:"snow"},
+        // {cue: "Fountain/baking/pop", answer:"soda"},
+        // {cue: "Safety/cushion/point", answer:"pin"},
+        // {cue: "Worm/shelf/end", answer:"book"},
+        // {cue: "Opera/hand/dish", answer:"soap"},
+        // {cue: "Cream/skate/water", answer:"ice"},
+        // {cue: "Duck/fold/dollar", answer:"bill"},
+        // {cue: "Aid/rubber/wagon", answer:"band"},
+        // {cue: "Cracker/fly/flight", answer:"fire"},
         {cue: "dream/break/light", answer: "day" }
     ];
 
     const examples = [
-        { cue: "carpet / alert / ink", answer: "red" },
+        // { cue: "carpet / alert / ink", answer: "red" },
         { cue: "cane / daddy / plum", answer: "sugar" }
       ];
 
@@ -530,7 +529,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
     }
 
-    function downloadCSV() {
+    function createCSV() {
         // initialize CSV content with headers
         let csvContent = 'prolific_id';
         for (let i = 0; i < userData.numbers.length; i++) {
@@ -551,17 +550,38 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         csvContent += '\n';
     
-        // create and download CSV file
-        let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        let link = document.createElement("a");
-        let url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", "user_data.csv");
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // upload csv to google drive
+        uploadCSVToDriveAutomatically(csvContent);
+        
     }
+
+    function uploadCSVToDriveAutomatically(csvContent) {
+        console.log('inside upload function');
+        // Convert the CSV content to Base64
+        const base64Data = btoa(encodeURIComponent(csvContent));
+        // const base64Data = btoa(unescape(encodeURIComponent(csvContent)));
+
+
+        // Replace with your Firebase Function URL
+        const functionUrl = "https://us-central1-project-rna-ea4cc.cloudfunctions.net/uploadCSVToDrive";
+
+        fetch(functionUrl, {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ csvData: base64Data }),
+        })
+        .then(response => response.text())
+        .then(result => {
+            console.log('CSV uploaded successfully:', result);
+        })
+        .catch(error => {
+            console.error('Error uploading CSV:', error);
+        });
+        
+        }
+
 
     function endSession(){
         clearTimeout(timeoutId);
@@ -569,6 +589,7 @@ document.addEventListener('DOMContentLoaded', function() {
         digitInputField.style.display = 'none';
         wordInputField.style.display = 'none';
         progressContainer.style.visibility = 'hidden';
+        taskProgress.style.visibility = 'hidden';
         prompt.style.visibility = 'hidden';
     
         if (taskType === 'number') {
@@ -579,15 +600,17 @@ document.addEventListener('DOMContentLoaded', function() {
             transitionToWordTask();
         }else {
             // final completion of all tasks
+            taskType = 'done';
             wordInputField.disabled = true;
             wordInputField.style.display = 'none';
             submitButton.style.visibility = 'hidden';
 
-            prompt.textContent = 'Session completed. Thank you! You will be prompted to download a CSV file with your inputs.';
+            prompt.textContent = 'Session completed. Thank you! You may close this window.';
             prompt.style.visibility = 'visible';
+            console.log('session ended');
 
             taskType = null;
-            downloadCSV();
+            createCSV();
         }
     }
     

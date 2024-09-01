@@ -1,0 +1,12 @@
+{
+  "projects": {
+    "default": "project-rna-ea4cc"
+  },
+  "targets": {},
+  "etags": {
+    "project-rna-ea4cc": {
+      "extensionInstances": {}
+    }
+  },
+  "dataconnectEmulatorConfig": {}
+}

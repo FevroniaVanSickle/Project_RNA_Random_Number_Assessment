@@ -55,7 +55,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalNumEntries = 10;
 
     // Setup word test information
-    // from michelle: IDEALLY these would be read from a separate file, but they've been hardcoded for now
     const words = [
         { cue: "piece/mind/dating", answer: "game" },
         { cue: "hound/pressure/shot", answer: "blood" },
@@ -530,7 +529,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
     }
 
-    function downloadCSV() {
+    function createCSV() {
         // initialize CSV content with headers
         let csvContent = 'prolific_id';
         for (let i = 0; i < userData.numbers.length; i++) {
@@ -551,17 +550,36 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         csvContent += '\n';
     
-        // create and download CSV file
-        let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        let link = document.createElement("a");
-        let url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", "user_data.csv");
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // upload csv to google drive
+        uploadCSVToDriveAutomatically(csvContent);
+        
     }
+
+    function uploadCSVToDriveAutomatically(csvContent) {
+        console.log('inside upload function');
+        // Convert the CSV content to Base64
+        const base64Data = btoa(encodeURIComponent(csvContent));
+        // const base64Data = btoa(unescape(encodeURIComponent(csvContent)));
+
+        const functionUrl = "https://us-central1-project-rna-ea4cc.cloudfunctions.net/uploadCSVToDrive";
+
+        fetch(functionUrl, {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ csvData: base64Data }),
+        })
+        .then(response => response.text())
+        .then(result => {
+            console.log('CSV uploaded successfully:', result);
+        })
+        .catch(error => {
+            console.error('Error uploading CSV:', error);
+        });
+        
+        }
+
 
     function endSession(){
         clearTimeout(timeoutId);
@@ -569,6 +587,7 @@ document.addEventListener('DOMContentLoaded', function() {
         digitInputField.style.display = 'none';
         wordInputField.style.display = 'none';
         progressContainer.style.visibility = 'hidden';
+        taskProgress.style.visibility = 'hidden';
         prompt.style.visibility = 'hidden';
     
         if (taskType === 'number') {
@@ -579,15 +598,17 @@ document.addEventListener('DOMContentLoaded', function() {
             transitionToWordTask();
         }else {
             // final completion of all tasks
+            taskType = 'done';
             wordInputField.disabled = true;
             wordInputField.style.display = 'none';
             submitButton.style.visibility = 'hidden';
 
-            prompt.textContent = 'Session completed. Thank you! You will be prompted to download a CSV file with your inputs.';
+            prompt.textContent = 'Session completed. Thank you! You may close this window.';
             prompt.style.visibility = 'visible';
+            console.log('session ended');
 
             taskType = null;
-            downloadCSV();
+            createCSV();
         }
     }
     

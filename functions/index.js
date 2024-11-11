@@ -1,45 +1,61 @@
-const functions = require("firebase-functions");
 const { google } = require("googleapis");
-const cors = require("cors")({ origin: true });
+const functions = require("firebase-functions");
+const stream = require('stream');
+const cors = require('cors')({ origin: true });
+require('dotenv').config();
 
-// Initialize Google Drive API
-const drive = google.drive("v3");
 
 // Function to authenticate Google API
-const authenticateGoogle = () => {
-  const key = require(functions.config().google.service_account);
-
-  const auth = new google.auth.GoogleAuth({
+const authenticateGoogle = async () => {
+  try {
+    // const key = require(functions.config().google.service_account);
+    const key = require('./currentKey.json');
+    const auth = new google.auth.GoogleAuth({
     credentials: key,
-    scopes: ["https://www.googleapis.com/auth/drive.file"],
+    scopes: ["https://www.googleapis.com/auth/drive"], // recommend only accessing the folder you need
   });
-  return auth.getClient();
+  const client = await auth.getClient();
+  console.log('Authentication successful!');
+  return client;
+  } catch (error) {
+    console.error('Error during authentication:', error.message);
+    return null;
+  }
 };
 
 // Cloud Function to upload CSV to Google Drive
 exports.uploadCSVToDrive = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
     if (req.method !== "POST") {
-      return res.status(405).send("Method Not Allowed");
+      return res.status(405).json({message:"Method Not Allowed :("});
     }
-
     try {
+
+        if (!req.body.csvData) {
+          return res.status(400).send("No CSV data provided");
+        }
+
       const auth = await authenticateGoogle();
       const driveService = google.drive({ version: "v3", auth });
 
       // Get the Base64-encoded CSV data from the request
       const base64Data = req.body.csvData;
       const csvBuffer = Buffer.from(decodeURIComponent(escape(atob(base64Data))), "utf-8");
+      const passThroughStream = new stream.PassThrough();
+      passThroughStream.end(csvBuffer);
 
       // Define metadata and media for the upload
+      const timestamp = Date.now(); 
+      // const folderID = process.env.FOLDER;
+       const folderID = '';//REPLACE WITH FOLDER ID
       const fileMetadata = {
-        name: "participantResults.csv", // Replace with desired file name
-        parents: ["MHC"], // Optional: specify a folder
+        name: `${timestamp}_data.csv`, 
+        parents: [folderID], //store in config
       };
 
       const media = {
         mimeType: "text/csv",
-        body: csvBuffer,
+        body: passThroughStream,
       };
 
       // Upload file to Google Drive
@@ -48,12 +64,12 @@ exports.uploadCSVToDrive = functions.https.onRequest((req, res) => {
         media: media,
         fields: "id",
       });
-      console.log('file uploaded successfully');
-      res.status(200).send(`File uploaded successfully. File ID: ${response.data.id}`);
+
+      res.status(200).json({ message:  `File uploaded successfully! File ID: ${response.data.id}` });
     } catch (error) {
       console.error("Error uploading file:", error);
-      console.log('File not uploaded');
-      res.status(500).send("Error uploading file to Google Drive");
+      res.status(404).json({ message: `Error uploading file to Google Drive: ${error.message}` });
     }
   });
 });
+

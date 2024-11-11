@@ -30,7 +30,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // progress bar
     const progressContainer = document.getElementById('progress-container');
     const taskProgress = document.getElementById('task-progress');
-    const progressLabel = document.getElementById('progress-label');
     const roundProgress = document.getElementById('round-progress');
 
     // task countdown
@@ -41,6 +40,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let timeoutId;
     let roundCount = 0;
+    let numRoundDuration = 1000;
+    let wordRoundDuration = 15000;
+    let currentRoundDuration = 0;
 
     prolificIdInput.focus();
     let userData = {
@@ -52,12 +54,13 @@ document.addEventListener('DOMContentLoaded', function() {
     let totalRounds = 0;
     let taskType = 'number';
     let wordTaskStarted = false;
-    const totalNumEntries = 2;
+    const totalNumEntries = 20;
+    let tooSlow = false;
 
     // Setup word test information
     const words = [
-        // { cue: "piece/mind/dating", answer: "game" },
-        // { cue: "hound/pressure/shot", answer: "blood" },
+        // {cue: "piece/mind/dating", answer: "game" },
+        // {cue: "hound/pressure/shot", answer: "blood" },
         // {cue: "Main/sweeper/light", answer:"street"},
         // {cue: "Nuclear/feud/album", answer:"family"},
         // {cue: "Basket/eight/snow", answer:"ball"},
@@ -83,11 +86,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // {cue: "Duck/fold/dollar", answer:"bill"},
         // {cue: "Aid/rubber/wagon", answer:"band"},
         // {cue: "Cracker/fly/flight", answer:"fire"},
-        {cue: "dream/break/light", answer: "day" }
+        // {cue: "dream/break/light", answer: "day" }
     ];
 
     const examples = [
-        // { cue: "carpet / alert / ink", answer: "red" },
+        { cue: "carpet / alert / ink", answer: "red" },
         { cue: "cane / daddy / plum", answer: "sugar" }
       ];
 
@@ -199,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
         wordTestDescription.style.display = 'none';
         examplesButton.style.display = 'none'; 
         prompt.style.display = 'none';
-        // taskType = 'examples';
+        
         // ensuring the form does not reload
         if (wordForm) {
             wordForm.onsubmit = function(event) {
@@ -394,62 +397,77 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function playRound() {
+
+        // ensure we are in the right method 
+        if (taskType === 'word' && wordTaskStarted === false) return;
+        if (roundCount >= totalRounds) {
+            endSession();
+            return;
+        }   
+
         updateTaskProgressBar();
         playBeep();
 
-        if (taskType === 'word' && wordTaskStarted === false) return;
-
         if (taskType === 'number') {
-            updateTaskProgressBar();
+            digitInputField.style.display = 'block';
             digitInputField.style.backgroundColor = 'white'; 
             digitInputField.value = ''; // Clear previous input
             digitInputField.focus();
             prompt.textContent = 'Enter a digit (1-9):';
+            currentRoundDuration = numRoundDuration;
         }
-        else {
-            updateTaskProgressBar();
+        else if (taskType === 'word'){
+            wordInputField.disabled = false;
+            submitButton.style.visibility = 'visible';
+            wordInputField.style.display = 'block';
             wordInputField.style.backgroundColor = 'white';
             wordInputField.value = ''; // Clear previous input
             wordInputField.focus(); 
+            currentRoundDuration = wordRoundDuration;
+        } else { //for example 
+            wordInputField.disabled = false;
+            submitButton.style.visibility = 'visible';
+            wordInputField.style.display = 'block';
+            wordInputField.style.backgroundColor = 'white';
+            wordInputField.value = ''; // Clear previous input
+            wordInputField.focus(); 
+            currentRoundDuration = wordRoundDuration;
         }
-        updateTaskProgressBar();
-        if (roundCount < totalRounds) {
-            updateRoundProgressBar(taskType === 'number' ? 1000 : 15000);
-            timeoutId = setTimeout(handleTimeout, taskType === 'number' ? 1010 : 15010); // Ensure round times out if no input
-        } else {
-            endSession();
-        }
+        updateRoundProgressBar(currentRoundDuration);
+        manageProgressBar(currentRoundDuration); 
+
+        // Set up the next round
+        timeoutId = setTimeout(() => {
+            handleTimeout();
+        }, currentRoundDuration);
     }
 
     function handleTimeout() {
+
+        // ensure nothing can be entered while input is being processed. 
+        digitInputField.style.display = 'none';
+        wordInputField.style.display = 'none';
+        // ensure we are in the right method
         if (taskType === 'word' && wordTaskStarted === false) return;
 
         if (roundCount >= totalRounds) {
             endSession();
-        } else {            
-            prompt.textContent = 'Too slow!';
+        } else {      
+            tooSlow = true;      
             if (taskType === 'number') {
-                digitInputField.style.backgroundColor = 'lightcoral';
-                userData.numbers.push(''); // push input here so user recieves correct 'too slow' prompt
-                roundCount++;
-                manageProgressBar(1000);
-                updateTaskProgressBar();
-                clearTimeout(timeoutId); // stop countdown
-                setTimeout(playRound, 1000); 
+                processInput(digitInputField.value); //was empty previously 
             }
-            else if (taskType === 'word') {
-                processInput(); // go straight to processing to ensure smooth prompt transition
-            }
-            else if (taskType === 'examples'){
-                wordInputField.style.backgroundColor = 'lightcoral';
-                // roundCount++;
-                console.log('the handletimeout cue is: '+ examples[exampleIndex].cue);
-                roundCount++;
-                updateTaskProgressBar();   
-                manageProgressBar(1000); 
-                processExampleInput(); 
-            }
-            setTimeout(playRound, 1000);
+            // else if (taskType === 'word') {
+            //     processInput(); // go straight to processing to ensure smooth prompt transition
+            // }
+            // else if (taskType === 'examples'){
+            //     wordInputField.style.backgroundColor = 'lightcoral';
+            //     submitButton.style.visibility = 'none';
+            //     roundCount++;
+            //     updateTaskProgressBar();   
+            //     manageProgressBar(1000); 
+            //     processExampleInput(); 
+            // }
         }
     } 
 
@@ -457,163 +475,81 @@ document.addEventListener('DOMContentLoaded', function() {
     digitInputField.addEventListener('input', function(e) {
         e.preventDefault();
         processInput(this.value.trim());
+        digitInputField.style.visibility = 'none'; //no duplicate entries
     });
 
     // handle event listeners for word task 
     wordInputField.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && taskType === 'word') {
             e.preventDefault(); // prevent form submission 
+            wordInputField.disabled = true;
             processInput(this.value.trim());  
         }
     });
     submitButton.addEventListener('click', function() {
+        wordInputField.disabled = true;
         processInput(wordInputField.value.trim());
     });
 
-    function processInput(input) {
-        const correctAnswer = words[currentwordIndex].answer;
-        progressContainer.style.visibility = 'visible';
+//     wordForm.addEventListener('submit', function(e) {
+//         e.preventDefault();
+//         wordInputField.disabled = true;
+//         processInput(wordInputField.value.trim());
+// });
 
-        // ensures proper parsing and data consistency
-        if (!input){
-            input = ' '; 
-        }
+    function processInput(input) {
+
+        clearTimeout(timeoutId); // stop round countdown 
+        submitButton.style.visibility = 'hidden';
+        wordInputField.style.display = 'none';
+
         if (taskType === 'number') {
             const isValidInput = /^[1-9]$/.test(input);
             if (isValidInput) {
                 digitInputField.style.backgroundColor = 'lightgreen';
                 digitInputField.style.borderColor = 'green';
-                roundCount++;
-                userData.numbers.push(input); // save the number input by the user
-                manageProgressBar(1000);
-                updateTaskProgressBar();
-                clearTimeout(timeoutId); // stop countdown
-                setTimeout(playRound, 1000); // proceed to next round after a delay
-            } else {
+            } else if (tooSlow){
+                digitInputField.style.backgroundColor = 'lightcoral'; 
+                digitInputField.style.borderColor = 'lightcoral';
+                prompt.innerHTML = '<span style="color: lightcoral;">Too slow</span>';
+                tooSlow = false;
+            }
+            else {
+                digitInputField.style.display = 'none';
                 digitInputField.style.backgroundColor = 'lightcoral'; 
                 digitInputField.style.borderColor = 'lightcoral';
                 prompt.innerHTML = '<span style="color: lightcoral;">Number must be 1-9</span>';
-                roundCount++;
-                userData.words.push(input); // save the word input by the user
-                manageProgressBar(1000);
-                updateTaskProgressBar();
-                clearTimeout(timeoutId);
-                setTimeout(playRound, 1030);//must be this high to avoid 'too slow' message
             }
+            userData.numbers.push(input || ''); // save the number input by the user
+            roundCount++;
+            setTimeout(() => {
+                playRound();
+            }, 1000);
 
         } else if (taskType === 'word') {
-            if (input.toLowerCase() === correctAnswer.toLowerCase()) {
-                wordInputField.style.backgroundColor = 'lightgreen';
-                wordInputField.style.borderColor = 'green';
-            } else {
-                wordInputField.style.backgroundColor = 'lightcoral';
-                wordInputField.style.borderColor = 'lightcoral';
+            
+            if (tooSlow){
+                prompt.innerHTML = '<span style="color: lightcoral;">Too slow</span>';
+                tooSlow = false;
             }
+
             taskProgress.style.visibility = 'visible';
             roundCount++;
             userData.words.push(input);
-            manageProgressBar(1000);
-            updateTaskProgressBar();
-            clearTimeout(timeoutId); 
-            setTimeout(playRound, 1000);
             
-            setTimeout(() => {
-                wordInputField.value = '';
-                wordInputField.style.backgroundColor = 'white';
+            if (roundCount >= totalRounds) {
+                endSession();
+            } else {
                 if (++currentwordIndex < words.length) {
-                    prompt.textContent = 'Enter the word that best goes with the following: ' + words[currentwordIndex].cue;
-                } else {
-                    endSession();
-                }
-            }, 2000); // show result for 5 seconds
+                        prompt.textContent = 'Enter the word that best goes with the following: ' + words[currentwordIndex].cue;
+                    } 
+                setTimeout(() => {
+                    playRound();
+                },wordRoundDuration); 
             }
-    }
-
-    function createCSV() {
-        // initialize CSV content with headers
-        let csvContent = 'prolific_id';
-        for (let i = 0; i < userData.numbers.length; i++) {
-            csvContent += ',N' + (i + 1);
-        }
-        for (let i = 0; i < userData.words.length; i++) {
-            csvContent += ',W' + (i + 1);
-        }
-        csvContent += '\n';
-    
-        // add user data
-        csvContent += userData.prolific_id;
-        for (let i = 0; i < userData.numbers.length; i++) {
-            csvContent += ',' + userData.numbers[i];
-        }
-        for (let i = 0; i < userData.words.length; i++) {
-            csvContent += ',' + userData.words[i];
-        }
-        csvContent += '\n';
-    
-        // upload csv to google drive
-        uploadCSVToDriveAutomatically(csvContent);
-        
-    }
-
-    function uploadCSVToDriveAutomatically(csvContent) {
-        console.log('inside upload function');
-        // Convert the CSV content to Base64
-        const base64Data = btoa(encodeURIComponent(csvContent));
-        // const base64Data = btoa(unescape(encodeURIComponent(csvContent)));
-
-
-        // Replace with your Firebase Function URL
-        const functionUrl = "https://us-central1-project-rna-ea4cc.cloudfunctions.net/uploadCSVToDrive";
-
-        fetch(functionUrl, {
-            method: 'POST',
-            headers: {
-            'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ csvData: base64Data }),
-        })
-        .then(response => response.text())
-        .then(result => {
-            console.log('CSV uploaded successfully:', result);
-        })
-        .catch(error => {
-            console.error('Error uploading CSV:', error);
-        });
-        
+                }
         }
 
-
-    function endSession(){
-        clearTimeout(timeoutId);
-        digitInputField.disabled = true;
-        digitInputField.style.display = 'none';
-        wordInputField.style.display = 'none';
-        progressContainer.style.visibility = 'hidden';
-        taskProgress.style.visibility = 'hidden';
-        prompt.style.visibility = 'hidden';
-    
-        if (taskType === 'number') {
-            taskType = 'examples';  // update task type 
-            transitionToWordTask()
-        } else if (taskType === 'examples'){
-            taskType = 'word';
-            transitionToWordTask();
-        }else {
-            // final completion of all tasks
-            taskType = 'done';
-            wordInputField.disabled = true;
-            wordInputField.style.display = 'none';
-            submitButton.style.visibility = 'hidden';
-
-            prompt.textContent = 'Session completed. Thank you! You may close this window.';
-            prompt.style.visibility = 'visible';
-            console.log('session ended');
-
-            taskType = null;
-            createCSV();
-        }
-    }
-    
     function transitionToWordTask() { 
         startWordTaskButton.style.display = 'none';
         submitButton.style.display = 'none';
@@ -627,13 +563,12 @@ document.addEventListener('DOMContentLoaded', function() {
             examplesButton.focus();
         }  
     }
-
    // *****************  EXAMPLE METHODS *********************************** //
    
     function startExampleRounds() {
    
         if (roundCount < totalRounds) {
-            updateRoundProgressBar(taskType === 'number' ? 1000 : 15000);
+            updateRoundProgressBar(taskType === 'number' ? numRoundDuration : wordRoundDuration);
             timeoutId = setTimeout(handleTimeout, taskType === 'number' ? 1010 : 15010); // Ensure round times out if no input
         }
 
@@ -670,42 +605,41 @@ document.addEventListener('DOMContentLoaded', function() {
         let correctAnswer = examples[exampleIndex].answer;
         let input = wordInputField.value.trim();
         taskProgress.style.visibility = 'visible';
+        submitButton.style.visibility = 'hidden';
 
-        // ensures proper parsing and data consistency
-        if (!input){
-            input = 'null'; //CHANGE
-            console.log('input: ' + input);
-            setTimeout(() => {
-                handleExampleRounds();
-            }, 2000);
+        if (tooSlow){
+            wordInputField.style.display = 'none';
+            wordInputField.style.backgroundColor = 'lightcoral';
+            wordInputField.style.borderColor = 'lightcoral';
+            prompt.innerHTML = '<span style="color: lightcoral;">Too slow</span>';
+            tooSlow = false;
+        } 
+        else if (input.toLowerCase() === correctAnswer.toLowerCase()) {
+            wordInputField.style.backgroundColor = 'lightgreen';
+            wordInputField.style.borderColor = 'green';
+            prompt.innerHTML = `Correct, the answer was <span style="color: green;">${correctAnswer}</span>`;
+        } 
+        else if (input.toLowerCase() != correctAnswer.toLowerCase() && !tooSlow){
+            wordInputField.style.display = 'none';
+            wordInputField.style.backgroundColor = 'lightcoral';
+            wordInputField.style.borderColor = 'lightcoral';
+            prompt.innerHTML = `Incorrect, the answer was <span style="color: lightcoral;">${correctAnswer}</span>`;
         }
-        else{
-            if (input.toLowerCase() === correctAnswer.toLowerCase()) {
-                wordInputField.style.backgroundColor = 'lightgreen';
-                wordInputField.style.borderColor = 'green';
-                prompt.innerHTML = `Correct, the answer was <span style="color: green;">${correctAnswer}</span>`;
-                updateTaskProgressBar();  
-                manageProgressBar(1000);
-                clearTimeout(timeoutId);
-            } else {
-                wordInputField.style.backgroundColor = 'lightcoral';
-                wordInputField.style.borderColor = 'lightcoral';
-                prompt.innerHTML = `Incorrect, the answer was <span style="color: lightcoral;">${correctAnswer}</span>`;
-                updateTaskProgressBar();  
-                manageProgressBar(1000);
-                clearTimeout(timeoutId); // stop countdown
-            }
-            
-            setTimeout(() => {
-                handleExampleRounds();
-            }, 2000); // display correct answer for 3 seconds
-        }
+        updateTaskProgressBar();  
+        manageProgressBar(1000);
+        clearTimeout(timeoutId); // stop countdown
+        
+        setTimeout(() => {
+            handleExampleRounds();
+        }, 2000); // display correct answer for 2 seconds
     }
 
     function handleExampleRounds(){
-
+        wordInputField.style.display = 'block';
         wordInputField.value = '';
         wordInputField.style.backgroundColor = 'white';
+        submitButton.style.visibility = 'visible';
+        tooSlow = false; 
         if (++exampleIndex < examples.length) {
                 // move to the next example
                 prompt.textContent = 'Enter the word that best goes with the following: ' + examples[exampleIndex].cue;
@@ -729,4 +663,96 @@ document.addEventListener('DOMContentLoaded', function() {
             prompt.style.visibility = 'hidden';
         }
         }
+
+// ***************** End of User Input ********************** //
+
+        let isInitialized = false;
+    function createCSV() {
+        if (isInitialized) return;
+        isInitialized = true;
+        // initialize CSV content with headers
+        let csvContent = 'prolific_id';
+        for (let i = 0; i < userData.numbers.length; i++) {
+            csvContent += ',N' + (i + 1);
+        }
+        for (let i = 0; i < userData.words.length; i++) {
+            csvContent += ',W' + (i + 1);
+        }
+        csvContent += '\n';
+    
+        // add user data
+        csvContent += userData.prolific_id;
+        for (let i = 0; i < userData.numbers.length; i++) {
+            csvContent += ',' + userData.numbers[i];
+        }
+        for (let i = 0; i < userData.words.length; i++) {
+            csvContent += ',' + userData.words[i];
+        }
+        csvContent += '\n';
+        isInitialized = true;
+    
+        // upload csv to google drive
+        uploadCSVToDriveAutomatically(csvContent);
+        
+    }
+
+     function uploadCSVToDriveAutomatically(csvContent) {
+
+        // Convert the CSV content to Base64
+        const base64Data = btoa(unescape(encodeURIComponent(csvContent)));
+
+        const functionUrl = //REPLACE WITH FUNCTION URL
+        fetch(functionUrl, {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ csvData: base64Data }),
+        })
+        .then(response => {
+            if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json(); // Parse the JSON response
+        })
+        .then(result => {
+            console.log('CSV uploaded successfully:', result);
+        })
+        .catch(error => {
+            console.error('Error uploading CSV:', error);
+        });
+    }
+
+
+    function endSession(){
+        clearTimeout(timeoutId);
+        digitInputField.disabled = true;
+        digitInputField.style.display = 'none';
+        wordInputField.style.display = 'none';
+        progressContainer.style.visibility = 'hidden';
+        taskProgress.style.visibility = 'hidden';
+        prompt.style.visibility = 'hidden';
+    
+        // if (taskType === 'number') {
+        //     taskType = 'examples';  // update task type 
+        //     transitionToWordTask()
+        // } else if (taskType === 'examples'){
+        //     taskType = 'word';
+        //     transitionToWordTask();
+        // }else {
+            // final completion of all tasks
+            wordInputField.disabled = true;
+            wordInputField.style.display = 'none';
+            submitButton.style.visibility = 'hidden';
+
+            prompt.textContent = 'Session completed. Thank you! You may close this window.';
+            prompt.style.visibility = 'visible';
+            console.log('session ended');
+
+            taskType = null;
+            createCSV();
+            return;
+        // }
+    }
+
 })

@@ -72,3 +72,4 @@ node_modules/
 .json
 .github/workflows/firebase-hosting-merge.yml
 functions/_site/project-rna-ea4cc-0ce9fa88fa8d.json
+.github/workflows/project-rna-ea4cc-0ce9fa88fa8d.json
